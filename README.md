@@ -1,6 +1,6 @@
 # ai-job-tracker
 
-**Fight fire with fire!** An AI-built, AI-powered job tracker and search tool. Track applications, find openings via official APIs, and use Azure OpenAI for resume/JD fit scoring, tailoring, and cover letters. Bring your own keys — run locally or deploy to your own Azure Static Web App. Open source (AGPLv3).
+**Fight fire with fire!** An AI-built, AI-powered job tracker and search tool. Track applications, find openings via official APIs, and use Azure AI Foundry for resume/JD fit scoring, tailoring, and cover letters. Bring your own keys — run locally or deploy to your own Azure Static Web App. Open source (AGPLv3).
 
 > *"Screw your AI-assisted job tool that I have to pay for. I'll build my own AI-assisted job tool — with blackjack, and LinkedIn!"*
 > — with apologies to Bender 🤖
@@ -17,7 +17,7 @@ The pitch is simple — most "AI job search assistants" want a monthly subscript
 
 - **Track your applications.** Company, role, status, dates, follow-ups, notes — the whole pipeline from *saved* to *applied* to *offer* (or *ghosted*, we don't judge).
 - **Search real openings.** Pulls listings from official, above-board APIs (Adzuna, USAJobs, ATS feeds) — no scraping, no fragile gray-area nonsense.
-- **Let the robots help.** With your own Azure OpenAI key: score how well your resume fits a posting, get tailoring suggestions, and draft cover letters and outreach.
+- **Let the robots help.** With your own Azure AI Foundry key: score how well your resume fits a posting, get tailoring suggestions, and draft cover letters and outreach.
 - **Know what's next.** The tracker doesn't just sit there — it tells you what to follow up on and what's worth applying to next.
 
 ## The deal with keys (a.k.a. why this is free)
@@ -41,7 +41,7 @@ npm install && cd api && npm install && cd ..     # install root + API deps sepa
 npm run dev                                       # http://localhost:4280
 ```
 
-That's it — it runs fully local, no cloud account required. The AI features stay dark until you add an Azure OpenAI key, so the plain tracker works out of the box.
+That's it — it runs fully local, no cloud account required. The AI features stay dark until you add an Azure AI Foundry key, so the plain tracker works out of the box.
 
 ## Deploy to Azure (optional)
 
@@ -53,7 +53,7 @@ All configuration is environment variables — see `.env.example` for the full l
 
 | What | Needed for |
 | --- | --- |
-| Azure OpenAI endpoint + key | Fit scoring, tailoring, cover letters |
+| Azure AI Foundry endpoint + key | Fit scoring, tailoring, cover letters |
 | Adzuna / USAJobs keys | Job search (each optional and independent) |
 | LinkedIn app key/secret | *Optional, off by default* — profile import |
 

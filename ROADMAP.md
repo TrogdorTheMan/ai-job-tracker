@@ -15,7 +15,7 @@
 | Frontend | Static SPA (Vite + **React**) on **Azure SWA** | Matches your existing SWA workflow; free tier |
 | API / backend | **Azure Functions** (SWA-managed) | Keeps all secrets + AI calls server-side, never in the browser |
 | Auth | **SWA built-in auth (EasyAuth)** — GitHub / Microsoft / Google | Zero custom auth code, zero cost |
-| AI | **Azure OpenAI** — `gpt-4o-mini` (generation) + `text-embedding-3-small` (scoring) | Cheapest capable models; BYO endpoint + key |
+| AI | **Azure AI Foundry** — `gpt-4o-mini` (generation) + `text-embedding-3-small` (scoring) | Cheapest capable models; BYO endpoint + key |
 | Storage | **Local:** SQLite/JSON · **Cloud:** Azure Table Storage or Cosmos serverless (free tier) | Cheapest path that works both ways |
 | Job sources | Official APIs only: **Adzuna, USAJobs, Greenhouse/Lever ATS feeds** | Free, within ToS, no scraping fragility |
 | Profile | **LinkedIn — optional:** free OpenID login (basic profile) + user's own data-export `.zip` (full work history). No API key required for core value; OAuth login feature-flagged for deployers who register a free OAuth app | Official + ToS-safe; **no scraping**; core never depends on it |
