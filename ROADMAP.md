@@ -27,7 +27,7 @@
 
 ## 2. Milestones
 
-### M0 — Foundations *(scaffolding, ~week 1)*
+### M0 — Foundations ✅ *(complete)*
 Repo + license + the "two ways to run" skeleton.
 - **AGPLv3 `LICENSE`** + `NOTICE`/`AUTHORS` file + a copyright header in each source file — this is what carries your attribution forward into every fork (the legal trail, independent of GitHub's UI)
 - `README`, `CONTRIBUTING`, `.env.example`, `.gitignore` (excludes all secrets)
