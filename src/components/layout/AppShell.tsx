@@ -3,11 +3,12 @@
 // Licensed under the GNU AGPLv3. See LICENSE for details.
 
 import { Link, NavLink, Outlet } from 'react-router-dom'
-import { LayoutGrid, List, Plus } from 'lucide-react'
+import { LayoutGrid, List, LogOut, Plus, User } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
+import type { ClientPrincipal } from '@/hooks/useAuth'
 
-export default function AppShell() {
+export default function AppShell({ user }: { user: ClientPrincipal }) {
   return (
     <div className="min-h-screen bg-background">
       <header className="border-b border-border sticky top-0 z-10 bg-background/95 backdrop-blur">
@@ -47,12 +48,23 @@ export default function AppShell() {
               </NavLink>
             </nav>
           </div>
-          <Button asChild size="sm">
-            <Link to="/applications/new">
-              <Plus className="size-4" />
-              Add job
-            </Link>
-          </Button>
+          <div className="flex items-center gap-2">
+            <Button asChild size="sm">
+              <Link to="/applications/new">
+                <Plus className="size-4" />
+                Add job
+              </Link>
+            </Button>
+            <div className="flex items-center gap-1.5 text-sm text-muted-foreground pl-2 border-l border-border">
+              <User className="size-3.5" />
+              <span className="max-w-24 truncate">{user.userDetails}</span>
+            </div>
+            <Button variant="ghost" size="icon" asChild title="Sign out">
+              <a href="/.auth/logout?post_logout_redirect_uri=/">
+                <LogOut className="size-4" />
+              </a>
+            </Button>
+          </div>
         </div>
       </header>
       <main className="max-w-screen-xl mx-auto px-4 py-6">

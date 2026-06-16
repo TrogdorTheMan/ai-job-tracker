@@ -9,7 +9,11 @@ function getStore() {
 
   if (backend === 'local') return localStore
 
-  // azure-table adapter arrives in M1 once cloud storage is wired up
+  if (backend === 'azure-table') {
+    const { azureTableStore } = require('./azureTableStore')
+    return azureTableStore
+  }
+
   throw new Error(`Unsupported DATA_BACKEND: "${backend}"`)
 }
 

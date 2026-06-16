@@ -3,16 +3,24 @@
 // Licensed under the GNU AGPLv3. See LICENSE for details.
 
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
+import { useAuth } from '@/hooks/useAuth'
 import AppShell from '@/components/layout/AppShell'
+import LoginPage from '@/components/auth/LoginPage'
 import BoardPage from '@/pages/BoardPage'
 import ListPage from '@/pages/ListPage'
 import ApplicationFormPage from '@/pages/ApplicationFormPage'
 
 export default function App() {
+  const { user, loading } = useAuth()
+
+  if (loading) return null
+
+  if (!user) return <LoginPage />
+
   return (
     <BrowserRouter>
       <Routes>
-        <Route path="/" element={<AppShell />}>
+        <Route path="/" element={<AppShell user={user} />}>
           <Route index element={<Navigate to="/board" replace />} />
           <Route path="board" element={<BoardPage />} />
           <Route path="list" element={<ListPage />} />
