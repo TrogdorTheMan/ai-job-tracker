@@ -46,7 +46,7 @@ A solid manual job tracker.
 - ✅ Filter + sort on board/list; timeline of status changes per application
 - **Done when:** you can track a real job hunt — what you applied to, when, where it stands, and what's next — without touching any AI or external API.
 
-### M2 — Job aggregation *(official APIs)*
+### M2 — Job aggregation 🚧 *(in progress)*
 Search real listings inside the app.
 - Connector interface + first connectors: Adzuna, USAJobs (both free keys)
 - Search UI (keywords, location, remote); one-click "save to tracker"

@@ -66,8 +66,8 @@ function CardInner({
             <GripVertical className="size-3.5" />
           </button>
           <div className="min-w-0 flex-1">
-            <CardTitle className="text-sm font-semibold truncate">{app.company}</CardTitle>
-            <p className="text-xs text-muted-foreground truncate mt-0.5">{app.role}</p>
+            <CardTitle className="text-sm font-semibold leading-snug line-clamp-2">{app.company}</CardTitle>
+            <p className="text-xs text-muted-foreground mt-0.5 line-clamp-2">{app.role}</p>
           </div>
           <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity shrink-0">
             {app.url && (
@@ -91,13 +91,12 @@ function CardInner({
       {(app.location ?? app.appliedDate) && (
         <CardContent className="p-3 pt-1">
           {app.location && (
-            <p className="text-xs text-muted-foreground">
-              {app.location}
-              {app.remote ? ' · Remote' : ''}
+            <p className="text-xs text-muted-foreground truncate">
+              {app.location}{app.remote ? ' · Remote' : ''}
             </p>
           )}
           {app.appliedDate && (
-            <p className="text-xs text-muted-foreground">
+            <p className="text-xs text-muted-foreground truncate">
               Applied {new Date(app.appliedDate).toLocaleDateString()}
             </p>
           )}
@@ -146,7 +145,7 @@ function DroppableColumn({
   const { setNodeRef, isOver } = useDroppable({ id: status })
 
   return (
-    <div className="flex-1 min-w-36">
+    <div className="flex-1 min-w-0">
       <div className="flex items-center justify-between mb-2 px-1">
         <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
           {STATUS_LABELS[status]}
@@ -236,8 +235,8 @@ export default function BoardPage() {
   return (
     <DndContext sensors={sensors} onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
       <FilterBar search={search} onSearch={setSearch} remoteOnly={remoteOnly} onRemoteOnly={setRemoteOnly} />
-      <div className="overflow-x-auto pb-4">
-        <div className="flex gap-3">
+      <div className="pb-4">
+        <div className="flex gap-2">
           {STATUS_ORDER.map((status) => (
             <DroppableColumn
               key={status}
@@ -250,7 +249,7 @@ export default function BoardPage() {
       </div>
       <DragOverlay>
         {activeApp && (
-          <div className="w-56 rotate-1 shadow-xl">
+          <div className="min-w-48 w-56 rotate-1 shadow-xl">
             <CardInner app={activeApp} onDelete={() => undefined} />
           </div>
         )}

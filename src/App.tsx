@@ -8,6 +8,7 @@ import AppShell from '@/components/layout/AppShell'
 import LoginPage from '@/components/auth/LoginPage'
 import BoardPage from '@/pages/BoardPage'
 import ListPage from '@/pages/ListPage'
+import SearchPage from '@/pages/SearchPage'
 import ApplicationFormPage from '@/pages/ApplicationFormPage'
 
 export default function App() {
@@ -24,6 +25,7 @@ export default function App() {
           <Route index element={<Navigate to="/board" replace />} />
           <Route path="board" element={<BoardPage />} />
           <Route path="list" element={<ListPage />} />
+          <Route path="search" element={<SearchPage />} />
           <Route path="applications/new" element={<ApplicationFormPage />} />
           <Route path="applications/:id/edit" element={<ApplicationFormPage />} />
         </Route>

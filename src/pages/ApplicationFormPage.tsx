@@ -2,8 +2,9 @@
 // Copyright (C) 2026 Cory "TrogdorTheMan" Francis
 // Licensed under the GNU AGPLv3. See LICENSE for details.
 
-import { useState, useEffect, type FormEvent } from 'react'
-import { useNavigate, useParams } from 'react-router-dom'
+import { useState, useEffect, useRef, type FormEvent } from 'react'
+import { useNavigate, useParams, useLocation } from 'react-router-dom'
+import type { JobSearchResult } from '@/types/search'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
@@ -91,7 +92,12 @@ function formStateToPayload(f: FormState) {
 export default function ApplicationFormPage() {
   const { id } = useParams()
   const navigate = useNavigate()
+  const routerLocation = useLocation()
   const isEdit = Boolean(id)
+  // Capture navigation state once at mount so it doesn't need to be in useEffect deps
+  const initialPrefillRef = useRef<JobSearchResult | undefined>(
+    routerLocation.state?.prefill as JobSearchResult | undefined
+  )
 
   const [form, setForm] = useState<FormState>(makeDefaults)
   const [statusHistory, setStatusHistory] = useState<StatusEvent[]>([])
@@ -99,9 +105,57 @@ export default function ApplicationFormPage() {
   const [loadError, setLoadError] = useState<string | null>(null)
   const [saveError, setSaveError] = useState<string | null>(null)
 
+  // URL import widget state
+  const [importUrl, setImportUrl] = useState('')
+  const [importing, setImporting] = useState(false)
+  const [importError, setImportError] = useState<string | null>(null)
+
+  async function handleImport() {
+    setImporting(true)
+    setImportError(null)
+    try {
+      const res = await fetch('/api/import-url', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ url: importUrl }),
+      })
+      if (!res.ok) throw new Error('Import failed')
+      const data = await res.json()
+      if (data._meta?.error) {
+        setImportError(data._meta.error)
+        return
+      }
+      setForm((prev) => ({
+        ...prev,
+        url: importUrl,
+        ...(data.role && { role: data.role }),
+        ...(data.company && { company: data.company }),
+        ...(data.location && { location: data.location }),
+        ...(typeof data.remote === 'boolean' && { remote: data.remote }),
+        ...(data.jobDescriptionText && { jobDescriptionText: data.jobDescriptionText }),
+      }))
+    } catch {
+      setImportError('Could not import URL. Try copying fields manually.')
+    } finally {
+      setImporting(false)
+    }
+  }
+
   useEffect(() => {
     if (!id) {
-      setForm(makeDefaults())
+      const prefill = initialPrefillRef.current
+      if (prefill) {
+        setForm({
+          ...makeDefaults(),
+          company: prefill.company,
+          role: prefill.title,
+          url: prefill.url,
+          location: prefill.location ?? '',
+          remote: prefill.remote ?? false,
+        })
+      } else {
+        setForm(makeDefaults())
+      }
       setStatusHistory([])
       return
     }
@@ -159,6 +213,34 @@ export default function ApplicationFormPage() {
       <h1 className="text-lg font-semibold mb-6">{isEdit ? 'Edit application' : 'Add job'}</h1>
 
       <form onSubmit={handleSubmit} className="space-y-6">
+        {/* URL import — new applications only */}
+        {!isEdit && (
+          <>
+            <div className="space-y-1.5">
+              <Label htmlFor="import-url">Import from URL</Label>
+              <div className="flex gap-2">
+                <Input
+                  id="import-url"
+                  type="url"
+                  value={importUrl}
+                  onChange={(e) => setImportUrl(e.target.value)}
+                  placeholder="Paste a job posting URL to auto-fill fields…"
+                />
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={handleImport}
+                  disabled={importing || !importUrl.trim()}
+                >
+                  {importing ? 'Importing…' : 'Import'}
+                </Button>
+              </div>
+              {importError && <p className="text-xs text-destructive">{importError}</p>}
+            </div>
+            <Separator />
+          </>
+        )}
+
         {/* Core */}
         <div className="grid grid-cols-2 gap-4">
           <div className="space-y-1.5">

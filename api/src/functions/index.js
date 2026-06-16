@@ -4,3 +4,5 @@
 
 require('./health')
 require('./applications')
+require('./search')
+require('./importUrl')
