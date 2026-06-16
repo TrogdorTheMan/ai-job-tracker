@@ -57,7 +57,7 @@ Search real listings inside the app.
 - ✅ **Kanban board improvements:** fluid equal-width columns that fill the viewport at any window size with no horizontal scroll; company and role titles line-clamped; location/date truncated
 - **Done when:** a user with their own Adzuna/USAJobs key can search and save jobs; a user with no keys can still paste a URL and save it; app still works for users who configure neither. ✅ Verified in production on Azure SWA.
 
-### M3 — AI fit scoring *(first Azure AI feature)*
+### M3 — AI fit scoring 🚧 *(in progress)*
 Resume ↔ job-description matching, with an optional LinkedIn-enriched profile.
 - Resume upload/paste → stored + embedded once (cached)
 - **LinkedIn profile enrichment — optional, no API key required:**
