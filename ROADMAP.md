@@ -18,7 +18,7 @@
 | AI | **Azure OpenAI** — `gpt-4o-mini` (generation) + `text-embedding-3-small` (scoring) | Cheapest capable models; BYO endpoint + key |
 | Storage | **Local:** SQLite/JSON · **Cloud:** Azure Table Storage or Cosmos serverless (free tier) | Cheapest path that works both ways |
 | Job sources | Official APIs only: **Adzuna, USAJobs, Greenhouse/Lever ATS feeds** | Free, within ToS, no scraping fragility |
-| Profile | **LinkedIn — optional, off by default**, feature-flagged behind user-supplied LinkedIn app key/secret; plus user data-export import | Official + ToS-safe; **no scraping**; core never depends on it |
+| Profile | **LinkedIn — optional:** free OpenID login (basic profile) + user's own data-export `.zip` (full work history). No API key required for core value; OAuth login feature-flagged for deployers who register a free OAuth app | Official + ToS-safe; **no scraping**; core never depends on it |
 | Secrets | `.env` (local) / SWA app settings / optional Key Vault (cloud) | Committed file is `.env.example` only |
 
 **Cost-minimization rules baked in:** small models by default; cache embeddings so a resume/JD is only embedded once; AI features are opt-in per-action (no background token burn); free-tier storage and auth.
@@ -48,13 +48,18 @@ A solid manual job tracker.
 Search real listings inside the app.
 - Connector interface + first connectors: Adzuna, USAJobs (both free keys)
 - Search UI (keywords, location, remote); one-click "save to tracker"
+- **Direct URL import:** paste any job posting URL → app fetches the page (user-initiated, single request — not scraping) and pre-fills company, role, and JD text; user reviews and saves. Fallback for any posting not covered by a connector.
 - Dedup + rate-limit handling; graceful degradation if a connector key is missing
-- **Done when:** a user with their own Adzuna/USAJobs key can search and save jobs; app still works for users who configure neither.
+- **Done when:** a user with their own Adzuna/USAJobs key can search and save jobs; a user with no keys can still paste a URL and save it; app still works for users who configure neither.
 
 ### M3 — AI fit scoring *(first Azure AI feature)*
 Resume ↔ job-description matching, with an optional LinkedIn-enriched profile.
 - Resume upload/paste → stored + embedded once (cached)
-- **LinkedIn profile import — optional, OFF by default, feature-flagged:** the entire feature stays dark unless a deployer provides their own LinkedIn app key/secret (the maintainer's own instance leaves it unset). When enabled: "Sign in with LinkedIn" (OpenID) pulls the basic profile; user can also drop in their official LinkedIn data export (`.zip`) for full work history. The AI then references this profile alongside the resume for richer fit scoring and, later, tailoring (M4) and assistant context (M5). **Strictly official APIs / user-provided exports — no scraping.** Implementation rule: the LinkedIn module is isolated behind the feature flag so the core app builds, runs, and passes tests with zero LinkedIn config; the data-export import works even when the API integration is disabled.
+- **LinkedIn profile enrichment — optional, no API key required:**
+  - **"Sign in with LinkedIn" (OpenID):** standard OAuth login using LinkedIn's free basic profile scope — no LinkedIn app approval or key needed beyond registering a free OAuth app. Pulls name, headline, and photo for identity.
+  - **Data export import:** user downloads their own `.zip` from LinkedIn (Settings → Data Privacy → Get a copy of your data) and drops it in the app. We parse the CSVs (positions, skills, education) client-side or server-side. No key, no scraping, fully ToS-compliant, and richer than what the API returns. **This is the primary enrichment path.**
+  - The AI references the parsed profile alongside the resume for richer fit scoring (M3), tailoring (M4), and assistant context (M5). **No scraping, ever.**
+  - Feature-flag the LinkedIn OAuth login (requires a registered OAuth app) so the app runs and passes tests without it; the data export import works regardless and is always on.
 - Embed saved JDs; cosine-similarity fit score + ranked list
 - Gap highlights: keywords/skills in the JD missing from the resume
 - **Done when:** saved jobs show a fit score and a "what's missing" summary, with embeddings cached (no re-embedding on reload).
@@ -81,7 +86,7 @@ Turns the tracker from a passive log into something that tells you what to do ne
 - **Done when:** tagged `v1.0.0`, README walks a newcomer from clone → running in <15 min.
 
 ### M7+ — Stretch
-More connectors (Lever/Greenhouse boards, Jooble), application Q&A autofill, analytics dashboard, scheduled "new matches" digest email, browser extension to capture postings.
+More connectors (Lever/Greenhouse boards, Jooble), application Q&A autofill, analytics dashboard, scheduled "new matches" digest email, browser extension to capture postings. **Custom job board sources:** let a user register an RSS feed or structured listing URL (e.g. a company careers page that publishes a feed) as a named source so it shows up alongside the built-in connectors in search.
 
 ---
 
