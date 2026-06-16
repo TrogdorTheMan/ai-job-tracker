@@ -1,3 +1,7 @@
+<!-- ai-job-tracker — AI-assisted job tracker and search tool -->
+<!-- Copyright (C) 2026 Cory "TrogdorTheMan" Francis -->
+<!-- Licensed under the GNU AGPLv3. See LICENSE for details. -->
+
 # ai-job-tracker
 
 **Fight fire with fire!** An AI-built, AI-powered job tracker and search tool. Track applications, find openings via official APIs, and use Azure AI Foundry for resume/JD fit scoring, tailoring, and cover letters. Bring your own keys — run locally or deploy to your own Azure Static Web App. Open source (AGPLv3).

@@ -1,3 +1,7 @@
+<!-- ai-job-tracker — AI-assisted job tracker and search tool -->
+<!-- Copyright (C) 2026 Cory "TrogdorTheMan" Francis -->
+<!-- Licensed under the GNU AGPLv3. See LICENSE for details. -->
+
 # Contributing
 
 Bug reports, ideas, and pull requests are all welcome. Be excellent to each other. (Please do not attempt to kill all humans.)

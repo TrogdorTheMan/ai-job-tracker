@@ -1,3 +1,7 @@
+<!-- ai-job-tracker — AI-assisted job tracker and search tool -->
+<!-- Copyright (C) 2026 Cory "TrogdorTheMan" Francis -->
+<!-- Licensed under the GNU AGPLv3. See LICENSE for details. -->
+
 # AI-Assisted Job Tracker & Search — Roadmap
 
 **License:** **AGPLv3** (strong copyleft + closes the SaaS/hosting loophole so it can never be made closed source, even as a hosted service) · **Hosting target:** Azure Static Web Apps · **Also runs:** fully local
