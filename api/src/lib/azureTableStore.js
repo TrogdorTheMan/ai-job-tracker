@@ -144,14 +144,36 @@ const azureTableStore = {
     await client.deleteEntity(userId, id)
   },
 
-  async getProfile(userId) {
+  async listResumes(userId) {
+    const client = getProfilesClient()
+    const resumes = []
+    const iter = client.listEntities({
+      queryOptions: { filter: `PartitionKey eq '${userId}'` },
+    })
+    for await (const entity of iter) {
+      resumes.push({
+        id: entity.rowKey,
+        userId: entity.partitionKey,
+        name: entity.name ?? 'Untitled',
+        resumeText: entity.resumeText ?? '',
+        createdAt: entity.createdAt,
+        updatedAt: entity.updatedAt,
+      })
+    }
+    return resumes
+  },
+
+  async getResume(userId, resumeId) {
     const client = getProfilesClient()
     try {
-      const entity = await client.getEntity(userId, 'profile')
+      const entity = await client.getEntity(userId, resumeId)
       return {
+        id: entity.rowKey,
         userId: entity.partitionKey,
+        name: entity.name ?? 'Untitled',
         resumeText: entity.resumeText ?? '',
         resumeEmbedding: entity.resumeEmbedding ? JSON.parse(entity.resumeEmbedding) : null,
+        createdAt: entity.createdAt,
         updatedAt: entity.updatedAt,
       }
     } catch (e) {
@@ -160,18 +182,32 @@ const azureTableStore = {
     }
   },
 
-  async saveProfile(userId, data) {
+  async saveResume(userId, resumeId, data) {
     const client = getProfilesClient()
     const now = new Date().toISOString()
+    let createdAt = now
+    try {
+      const existing = await client.getEntity(userId, resumeId)
+      createdAt = existing.createdAt ?? now
+    } catch {
+      // new resume
+    }
     const entity = {
       partitionKey: userId,
-      rowKey: 'profile',
+      rowKey: resumeId,
+      name: data.name ?? 'Untitled',
       resumeText: data.resumeText ?? '',
       resumeEmbedding: data.resumeEmbedding ? JSON.stringify(data.resumeEmbedding) : '',
+      createdAt,
       updatedAt: now,
     }
     await client.upsertEntity(entity, 'Replace')
-    return { userId, ...data, updatedAt: now }
+    return { id: resumeId, userId, ...data, createdAt, updatedAt: now }
+  },
+
+  async deleteResume(userId, resumeId) {
+    const client = getProfilesClient()
+    await client.deleteEntity(userId, resumeId)
   },
 
   async addStatusEvent(userId, applicationId, event) {

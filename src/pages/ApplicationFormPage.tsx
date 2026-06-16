@@ -19,6 +19,7 @@ import {
 import { Separator } from '@/components/ui/separator'
 import { STATUS_ORDER, STATUS_LABELS } from '@/types/job'
 import type { ApplicationStatus, JobApplication, StatusEvent } from '@/types/job'
+import { useResumes } from '@/hooks/useResumes'
 
 interface FormState {
   company: string
@@ -104,9 +105,19 @@ export default function ApplicationFormPage() {
   const [fitScore, setFitScore] = useState<number | undefined>()
   const [fitSummary, setFitSummary] = useState<string | undefined>()
   const [fitGaps, setFitGaps] = useState<string[]>([])
+  const [resumeId, setResumeId] = useState<string>('')
   const [saving, setSaving] = useState(false)
   const [loadError, setLoadError] = useState<string | null>(null)
   const [saveError, setSaveError] = useState<string | null>(null)
+
+  const { resumes } = useResumes()
+
+  // Auto-select first resume for new applications once the list loads
+  useEffect(() => {
+    if (!isEdit && resumes.length > 0 && !resumeId) {
+      setResumeId(resumes[0].id)
+    }
+  }, [isEdit, resumes, resumeId])
 
   // URL import widget state
   const [importUrl, setImportUrl] = useState('')
@@ -173,6 +184,7 @@ export default function ApplicationFormPage() {
         setFitScore(app.fitScore)
         setFitSummary(app.fitSummary)
         setFitGaps(app.fitGaps ?? [])
+        if (app.resumeId) setResumeId(app.resumeId)
       })
       .catch(() => setLoadError('Could not load application.'))
   }, [id])
@@ -197,7 +209,10 @@ export default function ApplicationFormPage() {
     setSaving(true)
     setSaveError(null)
     try {
-      const payload = formStateToPayload(form)
+      const payload = {
+        ...formStateToPayload(form),
+        ...(resumeId && { resumeId }),
+      }
       const res = await fetch(id ? `/api/applications/${id}` : '/api/applications', {
         method: id ? 'PUT' : 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -380,6 +395,29 @@ export default function ApplicationFormPage() {
             rows={6}
           />
         </div>
+
+        {resumes.length > 0 && (
+          <div className="space-y-1.5">
+            <Label htmlFor="resumeId">Score against resume</Label>
+            <Select
+              value={resumeId || '__none__'}
+              onValueChange={(v) => setResumeId(v === '__none__' ? '' : v)}
+            >
+              <SelectTrigger id="resumeId">
+                <SelectValue placeholder="Select a resume…" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="__none__">— none —</SelectItem>
+                {resumes.map((r) => (
+                  <SelectItem key={r.id} value={r.id}>{r.name}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <p className="text-xs text-muted-foreground">
+              Fit score is recalculated on save when a job description and resume are both set.
+            </p>
+          </div>
+        )}
 
         {isEdit && typeof fitScore === 'number' && (
           <div className="rounded-md border border-border p-3 space-y-2">

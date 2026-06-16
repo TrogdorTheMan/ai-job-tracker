@@ -12,10 +12,16 @@ async function tryScore(store, userId, body, context) {
   const jdText = (body.jobDescriptionText ?? '').trim()
   if (!jdText) return {}
   try {
-    const profile = await store.getProfile(userId)
-    if (!profile?.resumeEmbedding) return {}
+    let resume = null
+    if (body.resumeId) {
+      resume = await store.getResume(userId, body.resumeId)
+    } else {
+      const all = await store.listResumes(userId)
+      if (all.length > 0) resume = await store.getResume(userId, all[0].id)
+    }
+    if (!resume?.resumeEmbedding) return {}
     const jdEmbedding = await embed(jdText)
-    return score(profile.resumeEmbedding, jdEmbedding, profile.resumeText, jdText)
+    return score(resume.resumeEmbedding, jdEmbedding, resume.resumeText, jdText)
   } catch (err) {
     context.error('[applications] scoring failed:', err.message)
     return {}

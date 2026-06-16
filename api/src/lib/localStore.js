@@ -8,7 +8,7 @@ const crypto = require('crypto')
 
 const DATA_DIR = path.join(process.cwd(), '.data')
 const DATA_FILE = path.join(DATA_DIR, 'applications.json')
-const PROFILES_FILE = path.join(DATA_DIR, 'profiles.json')
+const RESUMES_FILE = path.join(DATA_DIR, 'resumes.json')
 
 function readStore() {
   if (!fs.existsSync(DATA_FILE)) return {}
@@ -76,21 +76,46 @@ const localStore = {
     writeStore(store)
   },
 
-  async getProfile(userId) {
-    if (!fs.existsSync(PROFILES_FILE)) return null
-    const store = JSON.parse(fs.readFileSync(PROFILES_FILE, 'utf8'))
-    return store[userId] ?? null
+  async listResumes(userId) {
+    if (!fs.existsSync(RESUMES_FILE)) return []
+    const store = JSON.parse(fs.readFileSync(RESUMES_FILE, 'utf8'))
+    const userResumes = store[userId] ?? {}
+    return Object.values(userResumes).map(({ resumeEmbedding: _omit, ...r }) => r)
   },
 
-  async saveProfile(userId, data) {
-    const store = fs.existsSync(PROFILES_FILE)
-      ? JSON.parse(fs.readFileSync(PROFILES_FILE, 'utf8'))
+  async getResume(userId, resumeId) {
+    if (!fs.existsSync(RESUMES_FILE)) return null
+    const store = JSON.parse(fs.readFileSync(RESUMES_FILE, 'utf8'))
+    return store[userId]?.[resumeId] ?? null
+  },
+
+  async saveResume(userId, resumeId, data) {
+    const store = fs.existsSync(RESUMES_FILE)
+      ? JSON.parse(fs.readFileSync(RESUMES_FILE, 'utf8'))
       : {}
     const now = new Date().toISOString()
-    store[userId] = { ...data, userId, updatedAt: now }
+    if (!store[userId]) store[userId] = {}
+    const existing = store[userId][resumeId] ?? {}
+    store[userId][resumeId] = {
+      ...existing,
+      ...data,
+      id: resumeId,
+      userId,
+      updatedAt: now,
+      createdAt: existing.createdAt ?? now,
+    }
     fs.mkdirSync(DATA_DIR, { recursive: true })
-    fs.writeFileSync(PROFILES_FILE, JSON.stringify(store, null, 2), 'utf8')
-    return store[userId]
+    fs.writeFileSync(RESUMES_FILE, JSON.stringify(store, null, 2), 'utf8')
+    return store[userId][resumeId]
+  },
+
+  async deleteResume(userId, resumeId) {
+    if (!fs.existsSync(RESUMES_FILE)) return
+    const store = JSON.parse(fs.readFileSync(RESUMES_FILE, 'utf8'))
+    if (store[userId]) {
+      delete store[userId][resumeId]
+      fs.writeFileSync(RESUMES_FILE, JSON.stringify(store, null, 2), 'utf8')
+    }
   },
 
   async addStatusEvent(userId, applicationId, event) {

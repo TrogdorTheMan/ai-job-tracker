@@ -76,6 +76,7 @@ export interface JobApplication {
   statusHistory: StatusEvent[]
 
   // AI fields — populated in M3+
+  resumeId?: string
   fitScore?: number
   fitSummary?: string
   fitGaps?: string[]
@@ -87,8 +88,8 @@ export interface JobApplication {
 
 export type NewJobApplication = Omit<
   JobApplication,
-  'id' | 'userId' | 'statusHistory' | 'createdAt' | 'updatedAt' | 'fitScore' | 'fitSummary' | 'fitGaps'
->
+  'id' | 'userId' | 'statusHistory' | 'createdAt' | 'updatedAt' | 'fitScore' | 'fitSummary' | 'fitGaps' | 'resumeId'
+> & { resumeId?: string }
 
 export type UpdateJobApplication = Partial<
   Omit<JobApplication, 'id' | 'userId' | 'createdAt'>
