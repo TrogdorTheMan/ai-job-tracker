@@ -72,7 +72,7 @@ export default function AppShell({ user }: { user: ClientPrincipal }) {
           </div>
         </div>
       </header>
-      <main className="max-w-screen-xl mx-auto px-4 py-6">
+      <main className="px-6 py-6">
         <Outlet />
       </main>
     </div>
