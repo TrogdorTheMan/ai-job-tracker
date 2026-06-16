@@ -88,7 +88,7 @@ function CardInner({
           </div>
         </div>
       </CardHeader>
-      {(app.location ?? app.appliedDate) && (
+      {(app.location ?? app.appliedDate ?? app.fitScore) && (
         <CardContent className="p-3 pt-1">
           {app.location && (
             <p className="text-xs text-muted-foreground truncate">
@@ -98,6 +98,16 @@ function CardInner({
           {app.appliedDate && (
             <p className="text-xs text-muted-foreground truncate">
               Applied {new Date(app.appliedDate).toLocaleDateString()}
+            </p>
+          )}
+          {typeof app.fitScore === 'number' && (
+            <p className={cn(
+              'text-xs font-medium mt-1',
+              app.fitScore >= 0.75 ? 'text-green-600 dark:text-green-400'
+                : app.fitScore >= 0.5 ? 'text-amber-600 dark:text-amber-400'
+                : 'text-muted-foreground'
+            )}>
+              {Math.round(app.fitScore * 100)}% fit
             </p>
           )}
         </CardContent>

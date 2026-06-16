@@ -158,6 +158,9 @@ export default function ListPage() {
                     <SortIcon field="appliedDate" sort={sort} />
                   </button>
                 </th>
+                <th className="text-left px-4 py-2.5 font-medium text-muted-foreground hidden lg:table-cell">
+                  Fit
+                </th>
                 <th className="px-4 py-2.5" />
               </tr>
             </thead>
@@ -183,6 +186,18 @@ export default function ListPage() {
                   </td>
                   <td className="px-4 py-3 text-muted-foreground hidden md:table-cell">
                     {app.appliedDate ? new Date(app.appliedDate).toLocaleDateString() : '—'}
+                  </td>
+                  <td className="px-4 py-3 hidden lg:table-cell">
+                    {typeof app.fitScore === 'number' ? (
+                      <span className={cn(
+                        'text-sm font-medium',
+                        app.fitScore >= 0.75 ? 'text-green-600 dark:text-green-400'
+                          : app.fitScore >= 0.5 ? 'text-amber-600 dark:text-amber-400'
+                          : 'text-muted-foreground'
+                      )}>
+                        {Math.round(app.fitScore * 100)}%
+                      </span>
+                    ) : '—'}
                   </td>
                   <td className="px-4 py-3">
                     <div className="flex items-center justify-end gap-1">

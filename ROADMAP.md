@@ -59,15 +59,18 @@ Search real listings inside the app.
 
 ### M3 — AI fit scoring 🚧 *(in progress)*
 Resume ↔ job-description matching, with an optional LinkedIn-enriched profile.
-- Resume upload/paste → stored + embedded once (cached)
-- **LinkedIn profile enrichment — optional, no API key required:**
-  - **"Sign in with LinkedIn" (OpenID):** standard OAuth login using LinkedIn's free basic profile scope — no LinkedIn app approval or key needed beyond registering a free OAuth app. Pulls name, headline, and photo for identity.
+- ✅ Resume upload/paste → stored at rest in Azure Table (per-user, BYO storage) + embedded once via `text-embedding-3-small` (cached); no re-embed on reload
+- ✅ `GET/PUT /api/profile` — stores `resumeText` + `resumeEmbedding` (vector cached, never sent to client); graceful no-op if Azure OpenAI keys absent
+- ✅ JD embedding on application save — if AI keys present + JD text present + resume embedding cached → compute cosine similarity + gap extraction inline; stored on the application record
+- ✅ `fitScore`, `fitSummary`, `fitGaps` displayed: kanban cards (colored %, green/amber), list view (Fit column), and application edit form (score + gap chips)
+- ✅ `/profile` page — resume paste area, embedded status badge, last-saved timestamp; nav link in header
+- ✅ Graceful degradation — no AI keys → no scores, everything else works normally
+- ✅ New env vars documented: `AZURE_OPENAI_ENDPOINT`, `AZURE_OPENAI_KEY`, `AZURE_OPENAI_EMBEDDING_DEPLOYMENT`
+- ⬜ **LinkedIn profile enrichment — optional, no API key required:**
   - **Data export import:** user downloads their own `.zip` from LinkedIn (Settings → Data Privacy → Get a copy of your data) and drops it in the app. We parse the CSVs (positions, skills, education) client-side or server-side. No key, no scraping, fully ToS-compliant, and richer than what the API returns. **This is the primary enrichment path.**
-  - The AI references the parsed profile alongside the resume for richer fit scoring (M3), tailoring (M4), and assistant context (M5). **No scraping, ever.**
-  - Feature-flag the LinkedIn OAuth login (requires a registered OAuth app) so the app runs and passes tests without it; the data export import works regardless and is always on.
-- Embed saved JDs; cosine-similarity fit score + ranked list
-- Gap highlights: keywords/skills in the JD missing from the resume
-- **Done when:** saved jobs show a fit score and a "what's missing" summary, with embeddings cached (no re-embedding on reload).
+  - **"Sign in with LinkedIn" (OpenID):** standard OAuth login using LinkedIn's free basic profile scope — no LinkedIn app approval or key needed beyond registering a free OAuth app. Pulls name, headline, and photo for identity. Feature-flagged.
+  - The AI references the parsed profile alongside the resume for richer fit scoring, tailoring (M4), and assistant context (M5). **No scraping, ever.**
+- **Done when:** LinkedIn enrichment shipped + saved jobs show a fit score and a "what's missing" summary, with embeddings cached (no re-embedding on reload).
 
 ### M4 — AI generation *(the differentiators)*
 - **Resume tailoring:** per-posting bullet/keyword edit suggestions (diff view, user approves)

@@ -6,18 +6,30 @@ const { TableClient } = require('@azure/data-tables')
 const crypto = require('crypto')
 
 const TABLE_NAME = 'applications'
+const PROFILES_TABLE_NAME = 'profiles'
 let _client = null
+let _profilesClient = null
 
 function getClient() {
   if (_client) return _client
   const conn = process.env.AZURE_STORAGE_CONNECTION_STRING
   if (!conn) throw new Error('AZURE_STORAGE_CONNECTION_STRING is not set')
   _client = TableClient.fromConnectionString(conn, TABLE_NAME)
-  // Create table on first use; ignore 409 (already exists)
   _client.createTable().catch((e) => {
     if (e.statusCode !== 409) throw e
   })
   return _client
+}
+
+function getProfilesClient() {
+  if (_profilesClient) return _profilesClient
+  const conn = process.env.AZURE_STORAGE_CONNECTION_STRING
+  if (!conn) throw new Error('AZURE_STORAGE_CONNECTION_STRING is not set')
+  _profilesClient = TableClient.fromConnectionString(conn, PROFILES_TABLE_NAME)
+  _profilesClient.createTable().catch((e) => {
+    if (e.statusCode !== 409) throw e
+  })
+  return _profilesClient
 }
 
 function toEntity(userId, app) {
@@ -130,6 +142,36 @@ const azureTableStore = {
   async deleteApplication(userId, id) {
     const client = getClient()
     await client.deleteEntity(userId, id)
+  },
+
+  async getProfile(userId) {
+    const client = getProfilesClient()
+    try {
+      const entity = await client.getEntity(userId, 'profile')
+      return {
+        userId: entity.partitionKey,
+        resumeText: entity.resumeText ?? '',
+        resumeEmbedding: entity.resumeEmbedding ? JSON.parse(entity.resumeEmbedding) : null,
+        updatedAt: entity.updatedAt,
+      }
+    } catch (e) {
+      if (e.statusCode === 404) return null
+      throw e
+    }
+  },
+
+  async saveProfile(userId, data) {
+    const client = getProfilesClient()
+    const now = new Date().toISOString()
+    const entity = {
+      partitionKey: userId,
+      rowKey: 'profile',
+      resumeText: data.resumeText ?? '',
+      resumeEmbedding: data.resumeEmbedding ? JSON.stringify(data.resumeEmbedding) : '',
+      updatedAt: now,
+    }
+    await client.upsertEntity(entity, 'Replace')
+    return { userId, ...data, updatedAt: now }
   },
 
   async addStatusEvent(userId, applicationId, event) {

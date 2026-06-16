@@ -4,6 +4,23 @@
 
 const { app } = require('@azure/functions')
 const { getStore } = require('../lib/storeFactory')
+const { embed, isConfigured } = require('../lib/embeddings')
+const { score } = require('../lib/scoring')
+
+async function tryScore(store, userId, body, context) {
+  if (!isConfigured()) return {}
+  const jdText = (body.jobDescriptionText ?? '').trim()
+  if (!jdText) return {}
+  try {
+    const profile = await store.getProfile(userId)
+    if (!profile?.resumeEmbedding) return {}
+    const jdEmbedding = await embed(jdText)
+    return score(profile.resumeEmbedding, jdEmbedding, profile.resumeText, jdText)
+  } catch (err) {
+    context.error('[applications] scoring failed:', err.message)
+    return {}
+  }
+}
 
 function getUserId(request) {
   const principal = request.headers.get('x-ms-client-principal')
@@ -33,10 +50,12 @@ app.http('createApplication', {
   methods: ['POST'],
   authLevel: 'anonymous',
   route: 'applications',
-  handler: async (request, _context) => {
+  handler: async (request, context) => {
     const store = getStore()
+    const userId = getUserId(request)
     const body = await request.json()
-    const application = await store.createApplication(getUserId(request), body)
+    const fitFields = await tryScore(store, userId, body, context)
+    const application = await store.createApplication(userId, { ...body, ...fitFields })
     return { status: 201, jsonBody: application }
   },
 })
@@ -57,11 +76,13 @@ app.http('updateApplication', {
   methods: ['PUT'],
   authLevel: 'anonymous',
   route: 'applications/{id}',
-  handler: async (request, _context) => {
+  handler: async (request, context) => {
     const store = getStore()
+    const userId = getUserId(request)
     const body = await request.json()
+    const fitFields = await tryScore(store, userId, body, context)
     try {
-      const application = await store.updateApplication(getUserId(request), request.params.id, body)
+      const application = await store.updateApplication(userId, request.params.id, { ...body, ...fitFields })
       return { status: 200, jsonBody: application }
     } catch (e) {
       return { status: 404, jsonBody: { error: e.message } }

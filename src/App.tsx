@@ -10,6 +10,7 @@ import BoardPage from '@/pages/BoardPage'
 import ListPage from '@/pages/ListPage'
 import SearchPage from '@/pages/SearchPage'
 import ApplicationFormPage from '@/pages/ApplicationFormPage'
+import ProfilePage from '@/pages/ProfilePage'
 
 export default function App() {
   const { user, loading } = useAuth()
@@ -28,6 +29,7 @@ export default function App() {
           <Route path="search" element={<SearchPage />} />
           <Route path="applications/new" element={<ApplicationFormPage />} />
           <Route path="applications/:id/edit" element={<ApplicationFormPage />} />
+          <Route path="profile" element={<ProfilePage />} />
         </Route>
       </Routes>
     </BrowserRouter>

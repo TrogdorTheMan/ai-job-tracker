@@ -2,8 +2,11 @@
 // Copyright (C) 2026 Cory "TrogdorTheMan" Francis
 // Licensed under the GNU AGPLv3. See LICENSE for details.
 
-require('./health')
-require('./applications')
-require('./search')
-require('./importUrl')
-require('./profile')
+export interface UserProfile {
+  userId: string
+  resumeText: string
+  hasEmbedding: boolean
+  aiConfigured: boolean
+  updatedAt: string
+  warning?: string
+}

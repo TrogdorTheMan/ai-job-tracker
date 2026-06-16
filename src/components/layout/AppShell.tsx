@@ -3,7 +3,7 @@
 // Licensed under the GNU AGPLv3. See LICENSE for details.
 
 import { Link, NavLink, Outlet } from 'react-router-dom'
-import { LayoutGrid, List, LogOut, Moon, Plus, Search, Sun, User } from 'lucide-react'
+import { LayoutGrid, List, LogOut, Moon, Plus, Search, Sun, User, FileText } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
 import type { ClientPrincipal } from '@/hooks/useAuth'
@@ -61,6 +61,20 @@ export default function AppShell({ user }: { user: ClientPrincipal }) {
               >
                 <Search className="size-4" />
                 Search
+              </NavLink>
+              <NavLink
+                to="/profile"
+                className={({ isActive }) =>
+                  cn(
+                    'flex items-center gap-1.5 text-sm px-3 py-1.5 rounded-md transition-colors',
+                    isActive
+                      ? 'bg-accent text-accent-foreground font-medium'
+                      : 'text-muted-foreground hover:text-foreground hover:bg-accent/50'
+                  )
+                }
+              >
+                <FileText className="size-4" />
+                Profile
               </NavLink>
             </nav>
           </div>

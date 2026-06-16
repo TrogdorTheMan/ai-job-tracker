@@ -8,6 +8,7 @@ const crypto = require('crypto')
 
 const DATA_DIR = path.join(process.cwd(), '.data')
 const DATA_FILE = path.join(DATA_DIR, 'applications.json')
+const PROFILES_FILE = path.join(DATA_DIR, 'profiles.json')
 
 function readStore() {
   if (!fs.existsSync(DATA_FILE)) return {}
@@ -73,6 +74,23 @@ const localStore = {
     const store = readStore()
     store[userId] = userApps(store, userId).filter((a) => a.id !== id)
     writeStore(store)
+  },
+
+  async getProfile(userId) {
+    if (!fs.existsSync(PROFILES_FILE)) return null
+    const store = JSON.parse(fs.readFileSync(PROFILES_FILE, 'utf8'))
+    return store[userId] ?? null
+  },
+
+  async saveProfile(userId, data) {
+    const store = fs.existsSync(PROFILES_FILE)
+      ? JSON.parse(fs.readFileSync(PROFILES_FILE, 'utf8'))
+      : {}
+    const now = new Date().toISOString()
+    store[userId] = { ...data, userId, updatedAt: now }
+    fs.mkdirSync(DATA_DIR, { recursive: true })
+    fs.writeFileSync(PROFILES_FILE, JSON.stringify(store, null, 2), 'utf8')
+    return store[userId]
   },
 
   async addStatusEvent(userId, applicationId, event) {

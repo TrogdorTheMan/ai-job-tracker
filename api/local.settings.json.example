@@ -4,6 +4,11 @@
     "AzureWebJobsStorage": "",
     "FUNCTIONS_WORKER_RUNTIME": "node",
     "DATA_BACKEND": "local",
-    "AZURE_STORAGE_CONNECTION_STRING": ""
+    "AZURE_STORAGE_CONNECTION_STRING": "",
+    "ADZUNA_APP_ID": "",
+    "ADZUNA_APP_KEY": "",
+    "AZURE_OPENAI_ENDPOINT": "",
+    "AZURE_OPENAI_KEY": "",
+    "AZURE_OPENAI_EMBEDDING_DEPLOYMENT": "text-embedding-3-small"
   }
 }

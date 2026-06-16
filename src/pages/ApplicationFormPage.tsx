@@ -101,6 +101,9 @@ export default function ApplicationFormPage() {
 
   const [form, setForm] = useState<FormState>(makeDefaults)
   const [statusHistory, setStatusHistory] = useState<StatusEvent[]>([])
+  const [fitScore, setFitScore] = useState<number | undefined>()
+  const [fitSummary, setFitSummary] = useState<string | undefined>()
+  const [fitGaps, setFitGaps] = useState<string[]>([])
   const [saving, setSaving] = useState(false)
   const [loadError, setLoadError] = useState<string | null>(null)
   const [saveError, setSaveError] = useState<string | null>(null)
@@ -167,6 +170,9 @@ export default function ApplicationFormPage() {
       .then((app: JobApplication) => {
         setForm(appToFormState(app))
         setStatusHistory(app.statusHistory ?? [])
+        setFitScore(app.fitScore)
+        setFitSummary(app.fitSummary)
+        setFitGaps(app.fitGaps ?? [])
       })
       .catch(() => setLoadError('Could not load application.'))
   }, [id])
@@ -364,7 +370,7 @@ export default function ApplicationFormPage() {
         <div className="space-y-1.5">
           <Label htmlFor="jd">
             Job description text
-            <span className="ml-2 text-xs text-muted-foreground font-normal">optional — used for AI fit scoring later</span>
+            <span className="ml-2 text-xs text-muted-foreground font-normal">used for AI fit scoring</span>
           </Label>
           <Textarea
             id="jd"
@@ -374,6 +380,31 @@ export default function ApplicationFormPage() {
             rows={6}
           />
         </div>
+
+        {isEdit && typeof fitScore === 'number' && (
+          <div className="rounded-md border border-border p-3 space-y-2">
+            <div className="flex items-center gap-2">
+              <span className={`text-sm font-semibold ${fitScore >= 0.75 ? 'text-green-600 dark:text-green-400' : fitScore >= 0.5 ? 'text-amber-600 dark:text-amber-400' : 'text-muted-foreground'}`}>
+                {Math.round(fitScore * 100)}% fit
+              </span>
+              {fitSummary && (
+                <span className="text-xs text-muted-foreground">{fitSummary}</span>
+              )}
+            </div>
+            {fitGaps.length > 0 && (
+              <div>
+                <p className="text-xs text-muted-foreground mb-1">Missing from resume:</p>
+                <div className="flex flex-wrap gap-1">
+                  {fitGaps.map((gap) => (
+                    <span key={gap} className="text-xs bg-muted px-1.5 py-0.5 rounded font-mono">
+                      {gap}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+        )}
 
         {saveError && <p className="text-sm text-destructive">{saveError}</p>}
 
