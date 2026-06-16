@@ -38,9 +38,9 @@ Repo + license + the "two ways to run" skeleton.
 
 ### M1 — Core tracker *(the product is useful even with zero AI)* 🚧 *in progress*
 A solid manual job tracker.
-- ⬜ Auth wired via EasyAuth; per-user data isolation
+- ✅ Auth wired via EasyAuth; per-user data isolation
 - ✅ CRUD for applications with full pipeline state: company, role, link, status (saved → applied → interview → offer/rejected/ghosted), applied date, follow-up date, next action, contacts, notes — the structured fields the AI assistant (M5) later reasons over
-- ⬜ Storage abstraction with two adapters (local JSON + Azure Table) behind one interface
+- 🔶 Storage abstraction with two adapters (local JSON + Azure Table) behind one interface — *code complete; Azure Table adapter untested in production (requires Storage account + app settings in SWA portal before M1 can be called done)*
 - ✅ Board (kanban) and list views
 - ✅ **Drag-and-drop kanban:** cards draggable between status columns to update status without opening the edit form
 - ⬜ Filter + sort on board/list; timeline of status changes per application
