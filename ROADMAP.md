@@ -42,6 +42,7 @@ A solid manual job tracker.
 - CRUD for applications with full pipeline state: company, role, link, status (saved → applied → interview → offer/rejected/ghosted), applied date, follow-up date, next action, contacts, notes — the structured fields the AI assistant (M5) later reasons over
 - Storage abstraction with two adapters (local file/SQLite + Azure Table) behind one interface
 - Board/list view with filter + sort; timeline of status changes per application
+- **Drag-and-drop kanban:** cards draggable between status columns to update status without opening the edit form
 - **Done when:** you can track a real job hunt — what you applied to, when, where it stands, and what's next — without touching any AI or external API.
 
 ### M2 — Job aggregation *(official APIs)*
