@@ -4,6 +4,7 @@
 
 import { useState, useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
+import FilterBar from '@/components/filters/FilterBar'
 import {
   DndContext,
   DragOverlay,
@@ -179,22 +180,28 @@ function DroppableColumn({
 export default function BoardPage() {
   const { applications, loading, error, refresh } = useApplications()
   const [activeApp, setActiveApp] = useState<JobApplication | null>(null)
+  const [search, setSearch] = useState('')
+  const [remoteOnly, setRemoteOnly] = useState(false)
 
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 8 } })
   )
 
-  const byStatus = useMemo(
-    () =>
-      STATUS_ORDER.reduce(
-        (acc, status) => {
-          acc[status] = applications.filter((a) => a.status === status)
-          return acc
-        },
-        {} as Record<ApplicationStatus, JobApplication[]>
-      ),
-    [applications]
-  )
+  const byStatus = useMemo(() => {
+    const filtered = applications.filter(
+      (a) =>
+        (!search ||
+          `${a.company} ${a.role}`.toLowerCase().includes(search.toLowerCase())) &&
+        (!remoteOnly || a.remote)
+    )
+    return STATUS_ORDER.reduce(
+      (acc, status) => {
+        acc[status] = filtered.filter((a) => a.status === status)
+        return acc
+      },
+      {} as Record<ApplicationStatus, JobApplication[]>
+    )
+  }, [applications, search, remoteOnly])
 
   function handleDragStart(event: DragStartEvent) {
     setActiveApp((event.active.data.current as { app: JobApplication } | undefined)?.app ?? null)
@@ -228,6 +235,7 @@ export default function BoardPage() {
 
   return (
     <DndContext sensors={sensors} onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
+      <FilterBar search={search} onSearch={setSearch} remoteOnly={remoteOnly} onRemoteOnly={setRemoteOnly} />
       <div className="overflow-x-auto pb-4">
         <div className="flex gap-3">
           {STATUS_ORDER.map((status) => (
