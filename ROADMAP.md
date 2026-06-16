@@ -66,6 +66,7 @@ Resume ↔ job-description matching, with an optional LinkedIn-enriched profile.
 - ✅ `/profile` page — resume paste area, embedded status badge, last-saved timestamp; nav link in header
 - ✅ Graceful degradation — no AI keys → no scores, everything else works normally
 - ✅ New env vars documented: `AZURE_OPENAI_ENDPOINT`, `AZURE_OPENAI_KEY`, `AZURE_OPENAI_EMBEDDING_DEPLOYMENT`
+- ⬜ **Resume file upload:** accept `.pdf` and `.docx` uploads on the Profile page as an alternative to paste; parse text server-side and feed into the same embed + store flow
 - ⬜ **LinkedIn profile enrichment — optional, no API key required:**
   - **Data export import:** user downloads their own `.zip` from LinkedIn (Settings → Data Privacy → Get a copy of your data) and drops it in the app. We parse the CSVs (positions, skills, education) client-side or server-side. No key, no scraping, fully ToS-compliant, and richer than what the API returns. **This is the primary enrichment path.**
   - **"Sign in with LinkedIn" (OpenID):** standard OAuth login using LinkedIn's free basic profile scope — no LinkedIn app approval or key needed beyond registering a free OAuth app. Pulls name, headline, and photo for identity. Feature-flagged.

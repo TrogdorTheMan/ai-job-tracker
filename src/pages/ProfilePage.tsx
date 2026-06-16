@@ -2,7 +2,7 @@
 // Copyright (C) 2026 Cory "TrogdorTheMan" Francis
 // Licensed under the GNU AGPLv3. See LICENSE for details.
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useProfile } from '@/hooks/useProfile'
 import { Button } from '@/components/ui/button'
 import { Textarea } from '@/components/ui/textarea'
@@ -14,6 +14,31 @@ export default function ProfilePage() {
   const { profile, loading, saving, error, save } = useProfile()
   const [resumeText, setResumeText] = useState('')
   const [saveMessage, setSaveMessage] = useState<string | null>(null)
+  const [parsing, setParsing] = useState(false)
+  const [parseError, setParseError] = useState<string | null>(null)
+  const fileInputRef = useRef<HTMLInputElement>(null)
+
+  async function handleFileUpload(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0]
+    if (!file) return
+    setParseError(null)
+    setSaveMessage(null)
+    setParsing(true)
+    try {
+      const formData = new FormData()
+      formData.append('file', file)
+      const res = await fetch('/api/resume/parse', { method: 'POST', body: formData })
+      const data = await res.json()
+      if (!res.ok) throw new Error(data.error ?? 'Parse failed')
+      setResumeText(data.resumeText)
+      setSaveMessage('Text extracted — review and click Save.')
+    } catch (err: unknown) {
+      setParseError(err instanceof Error ? err.message : 'Could not parse file.')
+    } finally {
+      setParsing(false)
+      if (fileInputRef.current) fileInputRef.current.value = ''
+    }
+  }
 
   useEffect(() => {
     if (profile?.resumeText) setResumeText(profile.resumeText)
@@ -56,6 +81,28 @@ export default function ProfilePage() {
             </div>
           )}
         </div>
+
+        <div className="flex items-center gap-2">
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept=".pdf,.docx"
+            className="hidden"
+            onChange={handleFileUpload}
+          />
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            disabled={parsing}
+            onClick={() => fileInputRef.current?.click()}
+          >
+            {parsing ? 'Extracting…' : 'Upload .pdf or .docx'}
+          </Button>
+          <span className="text-xs text-muted-foreground">or paste text below</span>
+        </div>
+
+        {parseError && <p className="text-sm text-destructive">{parseError}</p>}
 
         <Textarea
           id="resume"

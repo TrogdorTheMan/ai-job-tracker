@@ -29,7 +29,7 @@ app.http('getProfile', {
     if (!profile) return { status: 200, jsonBody: null }
     // Never send the embedding vector to the client — it's large and not useful in the UI
     const { resumeEmbedding: _omit, ...safe } = profile
-    return { status: 200, jsonBody: { ...safe, hasEmbedding: Boolean(profile.resumeEmbedding) } }
+    return { status: 200, jsonBody: { ...safe, hasEmbedding: Boolean(profile.resumeEmbedding), aiConfigured: isConfigured() } }
   },
 })
 
