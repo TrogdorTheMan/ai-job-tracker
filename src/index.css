@@ -3,14 +3,12 @@
  * Licensed under the GNU AGPLv3. See LICENSE for details.
  */
 
-*, *::before, *::after {
-  box-sizing: border-box;
-}
+@import "tailwindcss";
+
+/* shadcn/ui will append CSS variable theme tokens here when you first run:
+ * npx shadcn@latest add <component>
+ */
 
 body {
-  margin: 0;
   font-family: system-ui, -apple-system, sans-serif;
-  line-height: 1.5;
-  color: #1a1a1a;
-  background: #ffffff;
 }

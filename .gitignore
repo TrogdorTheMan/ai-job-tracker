@@ -18,6 +18,9 @@ api/local.settings.json
 # Test / coverage
 coverage/
 
+# Local data store (dev only)
+api/.data/
+
 # Azure Functions temp files
 bin/
 obj/
