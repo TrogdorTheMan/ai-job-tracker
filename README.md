@@ -13,7 +13,7 @@
 
 ## Status
 
-**M3 complete.** The core tracker (M1), job search (M2), and AI fit scoring (M3) are all shipped and verified in production on Azure SWA. M4 (resume tailoring + cover letter generation) is next. See [`ROADMAP.md`](ROADMAP.md) for the full plan.
+**M4 complete.** The core tracker (M1), job search (M2), AI fit scoring (M3), and AI generation (M4) are all shipped. M5 (next-best-action, pipeline summary) is next. See [`ROADMAP.md`](ROADMAP.md) for the full plan.
 
 ---
 
