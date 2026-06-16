@@ -15,7 +15,7 @@ import {
   useDraggable,
 } from '@dnd-kit/core'
 import type { DragEndEvent, DragStartEvent } from '@dnd-kit/core'
-import { Trash2, ExternalLink, GripVertical } from 'lucide-react'
+import { Trash2, ExternalLink } from 'lucide-react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -38,11 +38,9 @@ const STATUS_COLORS: Record<ApplicationStatus, string> = {
 function CardInner({
   app,
   onDelete,
-  dragHandleProps,
 }: {
   app: JobApplication
   onDelete: (id: string) => void
-  dragHandleProps?: React.HTMLAttributes<HTMLButtonElement>
 }) {
   const navigate = useNavigate()
 
@@ -52,21 +50,14 @@ function CardInner({
   }
 
   return (
-    <Card
-      onClick={() => navigate(`/applications/${app.id}/edit`)}
-      className="cursor-pointer hover:shadow-sm transition-shadow group bg-white dark:bg-card"
-    >
+    <Card className="cursor-grab active:cursor-grabbing hover:shadow-sm transition-shadow group bg-white dark:bg-card">
       <CardHeader className="p-3 pb-1">
         <div className="flex items-start gap-1.5">
-          <button
-            className="mt-0.5 shrink-0 cursor-grab active:cursor-grabbing text-muted-foreground/40 hover:text-muted-foreground transition-colors"
-            onClick={(e) => e.stopPropagation()}
-            {...dragHandleProps}
-          >
-            <GripVertical className="size-3.5" />
-          </button>
           <div className="min-w-0 flex-1">
-            <CardTitle className="text-sm font-semibold leading-snug line-clamp-2">{app.company}</CardTitle>
+            <CardTitle
+              className="text-sm font-semibold leading-snug line-clamp-2 cursor-pointer hover:underline"
+              onClick={() => navigate(`/applications/${app.id}/edit`)}
+            >{app.company}</CardTitle>
             <p className="text-xs text-muted-foreground mt-0.5 line-clamp-2">{app.role}</p>
           </div>
           <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity shrink-0">
@@ -107,7 +98,7 @@ function CardInner({
                 : app.fitScore >= 0.5 ? 'text-amber-600 dark:text-amber-400'
                 : 'text-muted-foreground'
             )}>
-              {Math.round(app.fitScore * 100)}% fit
+              {Math.round(app.fitScore * 100)}% resume fit
             </p>
           )}
         </CardContent>
@@ -137,8 +128,10 @@ function DraggableCard({
           : undefined
       }
       className={isDragging ? 'opacity-30' : ''}
+      {...attributes}
+      {...listeners}
     >
-      <CardInner app={app} onDelete={onDelete} dragHandleProps={{ ...attributes, ...listeners }} />
+      <CardInner app={app} onDelete={onDelete} />
     </div>
   )
 }
