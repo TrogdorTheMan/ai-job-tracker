@@ -18,8 +18,9 @@ import {
 } from '@/components/ui/select'
 import { Separator } from '@/components/ui/separator'
 import { STATUS_ORDER, STATUS_LABELS } from '@/types/job'
-import type { ApplicationStatus, JobApplication, StatusEvent } from '@/types/job'
+import type { ApplicationStatus, JobApplication, StatusEvent, TailoringSuggestion } from '@/types/job'
 import { useResumes } from '@/hooks/useResumes'
+import { GeneratePanel } from '@/components/GeneratePanel'
 
 interface FormState {
   company: string
@@ -88,6 +89,24 @@ function formStateToPayload(f: FormState) {
     ...(f.nextAction && { nextAction: f.nextAction }),
     ...(f.jobDescriptionText && { jobDescriptionText: f.jobDescriptionText }),
   }
+}
+
+function estimateTokens(resumeText: string, jdText: string) {
+  return Math.ceil((resumeText.length + jdText.length) / 4)
+}
+
+function estimateCost(tokens: number, provider: string | null, claudeModelId: string): string {
+  if (provider === 'claude') {
+    const rates: Record<string, number> = {
+      'claude-haiku-4-5': 1.00,
+      'claude-sonnet-4-6': 3.00,
+      'claude-opus-4-8': 5.00,
+    }
+    const rate = rates[claudeModelId] ?? 3.00
+    const cost = (tokens / 1_000_000) * rate
+    return cost < 0.01 ? '< $0.01' : `~$${cost.toFixed(3)}`
+  }
+  return '< $0.01'
 }
 
 export default function ApplicationFormPage() {
@@ -464,6 +483,134 @@ export default function ApplicationFormPage() {
           )}
         </div>
       </form>
+
+      {isEdit && form.jobDescriptionText.trim() && resumes.some((r) => r.generationConfigured) && (() => {
+        const selectedResume = resumes.find((r) => r.id === resumeId) ?? resumes[0]
+        const resumeText = selectedResume?.resumeText ?? ''
+        const aiProvider = resumes[0]?.aiProvider ?? null
+        const claudeModelId = localStorage.getItem('claudeModel') ?? 'claude-sonnet-4-6'
+        const estTokens = estimateTokens(resumeText, form.jobDescriptionText)
+        const estCost = estimateCost(estTokens, aiProvider, claudeModelId)
+        const claudeModel = localStorage.getItem('claudeModel') || undefined
+
+        return (
+          <div className="mt-8">
+            <Separator className="mb-6" />
+            <h2 className="text-sm font-semibold mb-1">AI Actions</h2>
+            <p className="text-xs text-muted-foreground mb-4">
+              Generate content tailored to this specific role. Results are shown inline — copy what you need.
+            </p>
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">Resume tailoring</p>
+                <GeneratePanel<{ suggestions: TailoringSuggestion[] }>
+                  label="Suggest resume edits"
+                  estimatedTokens={estTokens}
+                  estimatedCost={estCost}
+                  onGenerate={async () => {
+                    const res = await fetch(`/api/applications/${id}/generate/tailoring`, {
+                      method: 'POST',
+                      headers: { 'Content-Type': 'application/json' },
+                      body: JSON.stringify({ ...(claudeModel && { claudeModel }) }),
+                    })
+                    if (!res.ok) {
+                      const d = await res.json().catch(() => ({}))
+                      throw new Error((d as { error?: string }).error ?? 'Generation failed')
+                    }
+                    return res.json()
+                  }}
+                >
+                  {({ suggestions }) => (
+                    <div className="space-y-3">
+                      {suggestions.length === 0 && (
+                        <p className="text-sm text-muted-foreground">No suggestions — your resume already matches this JD well.</p>
+                      )}
+                      {suggestions.map((s, i) => (
+                        <div key={i} className="rounded-md border border-border p-3 space-y-2 text-sm">
+                          <div className="space-y-0.5">
+                            <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">Current</p>
+                            <p className="text-muted-foreground line-through decoration-muted-foreground/50">{s.original}</p>
+                          </div>
+                          <div className="space-y-0.5">
+                            <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">Suggested</p>
+                            <p>{s.suggested}</p>
+                          </div>
+                          <div className="flex items-start justify-between gap-3">
+                            <p className="text-xs text-muted-foreground italic">{s.reason}</p>
+                            <Button
+                              type="button"
+                              size="sm"
+                              variant="outline"
+                              className="shrink-0"
+                              onClick={() => navigator.clipboard.writeText(s.suggested)}
+                            >
+                              Copy
+                            </Button>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </GeneratePanel>
+              </div>
+
+              <div className="space-y-2">
+                <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">Cover letter & outreach</p>
+                <GeneratePanel<{ coverLetter: string; outreach: string }>
+                  label="Draft cover letter & outreach"
+                  estimatedTokens={estTokens}
+                  estimatedCost={estCost}
+                  onGenerate={async () => {
+                    const res = await fetch(`/api/applications/${id}/generate/cover-letter`, {
+                      method: 'POST',
+                      headers: { 'Content-Type': 'application/json' },
+                      body: JSON.stringify({ ...(claudeModel && { claudeModel }) }),
+                    })
+                    if (!res.ok) {
+                      const d = await res.json().catch(() => ({}))
+                      throw new Error((d as { error?: string }).error ?? 'Generation failed')
+                    }
+                    return res.json()
+                  }}
+                >
+                  {({ coverLetter, outreach }) => (
+                    <div className="space-y-4">
+                      <div className="space-y-1.5">
+                        <div className="flex items-center justify-between">
+                          <p className="text-xs font-medium">Cover letter</p>
+                          <Button
+                            type="button"
+                            size="sm"
+                            variant="outline"
+                            onClick={() => navigator.clipboard.writeText(coverLetter)}
+                          >
+                            Copy
+                          </Button>
+                        </div>
+                        <Textarea value={coverLetter} readOnly rows={12} className="text-sm resize-y" />
+                      </div>
+                      <div className="space-y-1.5">
+                        <div className="flex items-center justify-between">
+                          <p className="text-xs font-medium">Recruiter outreach</p>
+                          <Button
+                            type="button"
+                            size="sm"
+                            variant="outline"
+                            onClick={() => navigator.clipboard.writeText(outreach)}
+                          >
+                            Copy
+                          </Button>
+                        </div>
+                        <Textarea value={outreach} readOnly rows={5} className="text-sm resize-y" />
+                      </div>
+                    </div>
+                  )}
+                </GeneratePanel>
+              </div>
+            </div>
+          </div>
+        )
+      })()}
 
       {isEdit && statusHistory.length > 0 && (
         <div className="mt-8">

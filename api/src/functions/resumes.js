@@ -7,6 +7,7 @@ const crypto = require('crypto')
 const { getStore } = require('../lib/storeFactory')
 const { embed, isConfigured: isAzureConfigured } = require('../lib/embeddings')
 const claudeAI = require('../lib/claudeAI')
+const aiGenerate = require('../lib/aiGenerate')
 
 function getAiProvider() {
   if (isAzureConfigured()) return 'azure'
@@ -35,6 +36,7 @@ function safeResume(resume) {
     hasEmbedding: Boolean(resume.resumeEmbedding),
     aiConfigured: provider !== null,
     aiProvider: provider,
+    generationConfigured: aiGenerate.isConfigured(),
   }
 }
 
@@ -46,9 +48,15 @@ app.http('listResumes', {
     const store = getStore()
     const resumes = await store.listResumes(getUserId(request))
     const provider = getAiProvider()
+    const genConfigured = aiGenerate.isConfigured()
     return {
       status: 200,
-      jsonBody: resumes.map((r) => ({ ...r, aiConfigured: provider !== null, aiProvider: provider })),
+      jsonBody: resumes.map((r) => ({
+        ...r,
+        aiConfigured: provider !== null,
+        aiProvider: provider,
+        generationConfigured: genConfigured,
+      })),
     }
   },
 })

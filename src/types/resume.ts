@@ -10,6 +10,7 @@ export interface Resume {
   hasEmbedding: boolean
   aiConfigured: boolean
   aiProvider: 'azure' | 'claude' | null
+  generationConfigured: boolean
   createdAt: string
   updatedAt: string
   warning?: string

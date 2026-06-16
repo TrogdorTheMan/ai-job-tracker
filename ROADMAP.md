@@ -77,11 +77,12 @@ Resume ↔ job-description matching, with an optional LinkedIn-enriched profile.
   - **"Sign in with LinkedIn" (OpenID):** standard OAuth login using LinkedIn's free basic profile scope — requires a free LinkedIn OAuth app registration. Configured as a custom OIDC provider in Azure SWA EasyAuth; cloud-only (SWA emulator does not support custom OIDC). Feature-flagged via `LINKEDIN_CLIENT_ID` / `LINKEDIN_CLIENT_SECRET` SWA app settings.
 - **Done when:** LinkedIn enrichment shipped + saved jobs show a fit score and a "what's missing" summary, with embeddings cached (no re-embedding on reload). ✅ Complete.
 
-### M4 — AI generation *(the differentiators)*
-- **Resume tailoring:** per-posting bullet/keyword edit suggestions (diff view, user approves)
-- **Cover letter / outreach drafting:** tailored letter + recruiter message from profile + JD
-- Token-cost guardrails: per-action confirmation, model + max-tokens configurable
-- **Done when:** from a saved job, a user can generate tailored resume edits and a cover letter in a couple of clicks.
+### M4 — AI generation ✅ *(complete)*
+- ✅ **Resume tailoring:** per-posting bullet/keyword edit suggestions shown inline; copy individual suggestions; works on both Azure (chat deployment) and Claude paths
+- ✅ **Cover letter / outreach drafting:** tailored cover letter + LinkedIn DM drafted in one call; copy buttons on each; inline reveal with token-cost confirmation before generating
+- ✅ Token-cost guardrails: per-action confirmation strip showing estimated token count and cost before generation fires
+- ✅ Dual-provider: Azure Chat Completions path (`AZURE_OPENAI_CHAT_DEPLOYMENT`) or Claude path (`ANTHROPIC_API_KEY`), same auto-fallthrough pattern as M3 scoring
+- **Done when:** from a saved job, a user can generate tailored resume edits and a cover letter in a couple of clicks. ✅ Complete.
 
 ### M5 — AI application assistant *(intelligence over the pipeline)*
 Turns the tracker from a passive log into something that tells you what to do next. Reads the structured pipeline data from M1 (and fit scores from M3) — no scraping, no background token burn.

@@ -32,7 +32,10 @@ Most "AI job search assistants" want a monthly subscription to do things your ow
 - **LinkedIn data export import** — download your LinkedIn data export `.zip` (no API key needed) and import work history, skills, and education directly into the resume library
 - **LinkedIn login** — optional "Sign in with LinkedIn" via OpenID Connect; requires a free LinkedIn OAuth app registration
 
-**Coming in M4/M5:** Resume tailoring suggestions, cover letter drafting, next-best-action recommendations, follow-up detection.
+- **Resume tailoring** — click "Suggest resume edits" on any saved application to get up to 8 AI-suggested bullet rewrites keyed to that specific job description; copy individual suggestions into your resume
+- **Cover letter & outreach drafting** — one click generates a full cover letter and a short LinkedIn DM/recruiter outreach message, both tailored to the role; copy buttons on each
+
+**Coming in M5:** Next-best-action recommendations, stale application follow-up detection, pipeline summary.
 
 ---
 
@@ -71,9 +74,10 @@ All secrets go in `api/local.settings.json` for local dev, or as **SWA Applicati
 
 | Variable | Feature | Notes |
 |---|---|---|
-| `AZURE_OPENAI_ENDPOINT` | AI fit scoring | Your Azure AI Foundry endpoint URL |
-| `AZURE_OPENAI_KEY` | AI fit scoring | Key 1 or Key 2 from your Foundry resource |
+| `AZURE_OPENAI_ENDPOINT` | AI fit scoring + generation | Your Azure AI Foundry endpoint URL |
+| `AZURE_OPENAI_KEY` | AI fit scoring + generation | Key 1 or Key 2 from your Foundry resource |
 | `AZURE_OPENAI_EMBEDDING_DEPLOYMENT` | AI fit scoring | Deployment name; default `text-embedding-3-small` |
+| `AZURE_OPENAI_CHAT_DEPLOYMENT` | AI generation (M4) | Chat model deployment name (e.g. `gpt-4o-mini`); required for resume tailoring and cover letter drafting on the Azure path. Separate from the embedding deployment. |
 | `ADZUNA_APP_ID` + `ADZUNA_APP_KEY` | Job search | Free key at [developer.adzuna.com](https://developer.adzuna.com/) |
 | `USAJOBS_API_KEY` + `USAJOBS_USER_AGENT` | Job search (federal) | Free at [developer.usajobs.gov](https://developer.usajobs.gov/); user-agent must be your email |
 | `ANTHROPIC_API_KEY` | AI fit scoring (Claude) | API key from [console.anthropic.com](https://console.anthropic.com); activates automatically when Azure keys are absent. **Note:** Claude Pro (claude.ai subscription) does not include API access — a separate API account with usage-based billing is required. At personal scoring scale, cost is fractions of a cent per action. |

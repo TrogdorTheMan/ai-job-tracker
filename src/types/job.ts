@@ -94,3 +94,9 @@ export type NewJobApplication = Omit<
 export type UpdateJobApplication = Partial<
   Omit<JobApplication, 'id' | 'userId' | 'createdAt'>
 >
+
+export interface TailoringSuggestion {
+  original: string
+  suggested: string
+  reason: string
+}
