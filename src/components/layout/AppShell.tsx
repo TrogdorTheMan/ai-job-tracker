@@ -2,21 +2,24 @@
 // Copyright (C) 2026 Cory "TrogdorTheMan" Francis
 // Licensed under the GNU AGPLv3. See LICENSE for details.
 
-import { useState } from 'react'
+import { useState, useMemo } from 'react'
 import { Link, NavLink, Outlet } from 'react-router-dom'
-import { LayoutGrid, List, LogOut, Moon, Plus, Search, Sun, User, FileText } from 'lucide-react'
+import { LayoutGrid, List, LogOut, Moon, Plus, Search, Sun, User, FileText, Info } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
 import type { ClientPrincipal } from '@/hooks/useAuth'
 import { useTheme } from '@/hooks/useTheme'
 import { useKonamiCode } from '@/hooks/useKonamiCode'
 import BlackjackGame from '@/components/blackjack/BlackjackGame'
+import { BlackjackContext } from '@/contexts/blackjack'
 
 export default function AppShell({ user }: { user: ClientPrincipal }) {
   const { theme, toggle } = useTheme()
   const [showBlackjack, setShowBlackjack] = useState(false)
+  const blackjackCtx = useMemo(() => ({ open: () => setShowBlackjack(true) }), [])
   useKonamiCode(() => setShowBlackjack(true))
   return (
+    <BlackjackContext.Provider value={blackjackCtx}>
     <div className="min-h-screen bg-background">
       <header className="border-b border-border sticky top-0 z-10 bg-background/95 backdrop-blur">
         <div className="max-w-screen-xl mx-auto px-4 h-14 flex items-center justify-between">
@@ -90,6 +93,11 @@ export default function AppShell({ user }: { user: ClientPrincipal }) {
                 Add job
               </Link>
             </Button>
+            <Button variant="ghost" size="icon" asChild title="About">
+              <Link to="/about">
+                <Info className="size-4" />
+              </Link>
+            </Button>
             <Button variant="ghost" size="icon" onClick={toggle} title="Toggle theme">
               {theme === 'dark' ? <Sun className="size-4" /> : <Moon className="size-4" />}
             </Button>
@@ -110,5 +118,6 @@ export default function AppShell({ user }: { user: ClientPrincipal }) {
       </main>
       {showBlackjack && <BlackjackGame onClose={() => setShowBlackjack(false)} />}
     </div>
+    </BlackjackContext.Provider>
   )
 }

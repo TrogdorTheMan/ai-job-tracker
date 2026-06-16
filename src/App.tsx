@@ -11,6 +11,7 @@ import ListPage from '@/pages/ListPage'
 import SearchPage from '@/pages/SearchPage'
 import ApplicationFormPage from '@/pages/ApplicationFormPage'
 import ProfilePage from '@/pages/ProfilePage'
+import AboutPage from '@/pages/AboutPage'
 
 export default function App() {
   const { user, loading } = useAuth()
@@ -30,6 +31,7 @@ export default function App() {
           <Route path="applications/new" element={<ApplicationFormPage />} />
           <Route path="applications/:id/edit" element={<ApplicationFormPage />} />
           <Route path="profile" element={<ProfilePage />} />
+          <Route path="about" element={<AboutPage />} />
         </Route>
       </Routes>
     </BrowserRouter>
