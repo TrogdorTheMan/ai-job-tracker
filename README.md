@@ -3,7 +3,7 @@
 **Fight fire with fire!** An AI-built, AI-powered job tracker and search tool. Track applications, find openings via official APIs, and use Azure OpenAI for resume/JD fit scoring, tailoring, and cover letters. Bring your own keys — run locally or deploy to your own Azure Static Web App. Open source (AGPLv3).
 
 > *"Screw your AI-assisted job tool that I have to pay for. I'll build my own AI-assisted job tool — with blackjack, and LinkedIn!"*
-> — with apologies to a certain bending unit
+> — with apologies to Bender 🤖
 
 ---
 
