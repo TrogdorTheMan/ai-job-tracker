@@ -10,7 +10,22 @@ import { Textarea } from '@/components/ui/textarea'
 import { Label } from '@/components/ui/label'
 import { Badge } from '@/components/ui/badge'
 import { Separator } from '@/components/ui/separator'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select'
 import type { Resume } from '@/types/resume'
+
+const CLAUDE_MODELS = [
+  { id: 'claude-haiku-4-5', label: 'Haiku 4.5 — fast, economical' },
+  { id: 'claude-sonnet-4-6', label: 'Sonnet 4.6 — balanced (default)' },
+  { id: 'claude-opus-4-8', label: 'Opus 4.8 — most capable' },
+]
+const CLAUDE_MODEL_KEY = 'claudeModel'
+const CLAUDE_DEFAULT = 'claude-sonnet-4-6'
 
 interface ResumeFormProps {
   initial?: Pick<Resume, 'name' | 'resumeText'>
@@ -115,20 +130,26 @@ interface ResumeCardProps {
 }
 
 function ResumeCard({ resume, onEdit, onDelete }: ResumeCardProps) {
+  const aiStatus = () => {
+    if (!resume.aiConfigured) {
+      return <span className="text-xs text-muted-foreground">AI not configured</span>
+    }
+    if (resume.aiProvider === 'claude') {
+      return <Badge variant="secondary" className="text-xs">Claude AI ✓</Badge>
+    }
+    if (resume.hasEmbedding) {
+      return <Badge variant="secondary" className="text-xs">Embedded ✓</Badge>
+    }
+    return <Badge variant="outline" className="text-xs">Not embedded</Badge>
+  }
+
   return (
     <div className="rounded-md border border-border p-4 space-y-2">
       <div className="flex items-start justify-between gap-4">
         <div className="space-y-1 min-w-0">
           <p className="font-medium truncate">{resume.name}</p>
           <div className="flex items-center gap-2 flex-wrap">
-            {resume.hasEmbedding ? (
-              <Badge variant="secondary" className="text-xs">Embedded ✓</Badge>
-            ) : (
-              <Badge variant="outline" className="text-xs">Not embedded</Badge>
-            )}
-            {!resume.aiConfigured && (
-              <span className="text-xs text-muted-foreground">AI not configured</span>
-            )}
+            {aiStatus()}
             <span className="text-xs text-muted-foreground">
               Updated {new Date(resume.updatedAt).toLocaleDateString()}
             </span>
@@ -156,6 +177,15 @@ export default function ProfilePage() {
   const [linkedinImporting, setLinkedinImporting] = useState(false)
   const [linkedinError, setLinkedinError] = useState<string | null>(null)
   const linkedinInputRef = useRef<HTMLInputElement>(null)
+
+  const aiProvider = resumes.length > 0 ? (resumes[0].aiProvider ?? null) : null
+  const [claudeModel, setClaudeModelState] = useState<string>(
+    () => localStorage.getItem(CLAUDE_MODEL_KEY) ?? CLAUDE_DEFAULT
+  )
+  function setClaudeModel(model: string) {
+    setClaudeModelState(model)
+    localStorage.setItem(CLAUDE_MODEL_KEY, model)
+  }
 
   async function handleLinkedinImport(e: ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0]
@@ -246,6 +276,35 @@ export default function ProfilePage() {
         </div>
         {linkedinError && <p className="text-sm text-destructive">{linkedinError}</p>}
       </div>
+
+      {aiProvider === 'claude' && (
+        <>
+          <Separator />
+          <div className="rounded-md border border-border p-4 space-y-3 bg-muted/20">
+            <p className="text-sm font-medium">Trogdor's Own — Claude AI Settings</p>
+            <p className="text-xs text-muted-foreground">
+              Claude is your active AI backend. Pick a model for fit scoring — selection is saved
+              locally and sent with every scoring request.
+            </p>
+            <div className="space-y-1.5">
+              <Label htmlFor="claude-model">Scoring model</Label>
+              <Select value={claudeModel} onValueChange={setClaudeModel}>
+                <SelectTrigger id="claude-model" className="w-72">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {CLAUDE_MODELS.map((m) => (
+                    <SelectItem key={m.id} value={m.id}>{m.label}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <p className="text-xs text-muted-foreground">
+                Sonnet and Opus use extended thinking for deeper analysis. Haiku is fastest with lighter reasoning.
+              </p>
+            </div>
+          </div>
+        </>
+      )}
 
       <Separator />
 

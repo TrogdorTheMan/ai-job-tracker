@@ -209,9 +209,11 @@ export default function ApplicationFormPage() {
     setSaving(true)
     setSaveError(null)
     try {
+      const claudeModel = localStorage.getItem('claudeModel') || undefined
       const payload = {
         ...formStateToPayload(form),
         ...(resumeId && { resumeId }),
+        ...(claudeModel && { claudeModel }),
       }
       const res = await fetch(id ? `/api/applications/${id}` : '/api/applications', {
         method: id ? 'PUT' : 'POST',

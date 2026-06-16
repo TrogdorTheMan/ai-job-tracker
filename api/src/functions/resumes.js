@@ -5,7 +5,14 @@
 const { app } = require('@azure/functions')
 const crypto = require('crypto')
 const { getStore } = require('../lib/storeFactory')
-const { embed, isConfigured } = require('../lib/embeddings')
+const { embed, isConfigured: isAzureConfigured } = require('../lib/embeddings')
+const claudeAI = require('../lib/claudeAI')
+
+function getAiProvider() {
+  if (isAzureConfigured()) return 'azure'
+  if (claudeAI.isConfigured()) return 'claude'
+  return null
+}
 
 function getUserId(request) {
   const principal = request.headers.get('x-ms-client-principal')
@@ -22,7 +29,13 @@ function getUserId(request) {
 
 function safeResume(resume) {
   const { resumeEmbedding: _omit, ...safe } = resume
-  return { ...safe, hasEmbedding: Boolean(resume.resumeEmbedding), aiConfigured: isConfigured() }
+  const provider = getAiProvider()
+  return {
+    ...safe,
+    hasEmbedding: Boolean(resume.resumeEmbedding),
+    aiConfigured: provider !== null,
+    aiProvider: provider,
+  }
 }
 
 app.http('listResumes', {
@@ -32,9 +45,10 @@ app.http('listResumes', {
   handler: async (request, _context) => {
     const store = getStore()
     const resumes = await store.listResumes(getUserId(request))
+    const provider = getAiProvider()
     return {
       status: 200,
-      jsonBody: resumes.map((r) => ({ ...r, aiConfigured: isConfigured() })),
+      jsonBody: resumes.map((r) => ({ ...r, aiConfigured: provider !== null, aiProvider: provider })),
     }
   },
 })
@@ -58,7 +72,7 @@ app.http('createResume', {
     let resumeEmbedding = null
     let embeddingError = null
 
-    if (isConfigured()) {
+    if (isAzureConfigured()) {
       try {
         resumeEmbedding = await embed(resumeText)
       } catch (err) {
@@ -114,7 +128,7 @@ app.http('updateResume', {
     let resumeEmbedding = textChanged ? null : existing.resumeEmbedding
     let embeddingError = null
 
-    if (textChanged && isConfigured()) {
+    if (textChanged && isAzureConfigured()) {
       try {
         resumeEmbedding = await embed(resumeText)
       } catch (err) {

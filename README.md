@@ -59,7 +59,7 @@ npm install && cd api && npm install && cd ..
 npm run dev    # SWA + Functions + Vite → http://localhost:4280
 ```
 
-The plain tracker (kanban, list, form) works with no keys at all. AI features stay dark until `AZURE_OPENAI_ENDPOINT` and `AZURE_OPENAI_KEY` are set. Job search connectors are each independently optional.
+The plain tracker (kanban, list, form) works with no keys at all. AI features stay dark until either `AZURE_OPENAI_ENDPOINT`/`AZURE_OPENAI_KEY` (Azure path) or `ANTHROPIC_API_KEY` (Claude path) are set. Job search connectors are each independently optional.
 
 > **Note:** The local SWA emulator uses a mock auth system — you'll be signed in automatically. LinkedIn OAuth login is cloud-only (Azure SWA doesn't support custom OIDC providers in the emulator).
 
@@ -76,6 +76,7 @@ All secrets go in `api/local.settings.json` for local dev, or as **SWA Applicati
 | `AZURE_OPENAI_EMBEDDING_DEPLOYMENT` | AI fit scoring | Deployment name; default `text-embedding-3-small` |
 | `ADZUNA_APP_ID` + `ADZUNA_APP_KEY` | Job search | Free key at [developer.adzuna.com](https://developer.adzuna.com/) |
 | `USAJOBS_API_KEY` + `USAJOBS_USER_AGENT` | Job search (federal) | Free at [developer.usajobs.gov](https://developer.usajobs.gov/); user-agent must be your email |
+| `ANTHROPIC_API_KEY` | AI fit scoring (Claude) | API key from [console.anthropic.com](https://console.anthropic.com); activates automatically when Azure keys are absent. **Note:** Claude Pro (claude.ai subscription) does not include API access — a separate API account with usage-based billing is required. At personal scoring scale, cost is fractions of a cent per action. |
 | `LINKEDIN_CLIENT_ID` + `LINKEDIN_CLIENT_SECRET` | LinkedIn login | Register a free OAuth app at [linkedin.com/developers](https://www.linkedin.com/developers/); data export import works without these |
 | `DATA_BACKEND` | Storage | `local` (JSON file, default) or `azure-table` (cloud) |
 | `AZURE_STORAGE_CONNECTION_STRING` | Storage (cloud) | Required when `DATA_BACKEND=azure-table` |
@@ -105,6 +106,23 @@ LinkedIn OAuth login requires a free app registration:
 4. Copy **Client ID** and **Client Secret** into your SWA Application Settings as `LINKEDIN_CLIENT_ID` and `LINKEDIN_CLIENT_SECRET`
 
 The LinkedIn login button appears automatically once the keys are configured.
+
+---
+
+## Trogdor's Own — Claude AI backend (optional)
+
+By default, fit scoring uses Azure AI Foundry (embeddings + cosine similarity). If you'd rather use Claude instead — or if you don't have an Azure OpenAI account — you can swap in Anthropic's API as the AI backend. The two paths are mutually exclusive by configuration: Azure runs when `AZURE_OPENAI_ENDPOINT` and `AZURE_OPENAI_KEY` are set; Claude runs when those are absent and `ANTHROPIC_API_KEY` is set.
+
+**What changes with Claude:**
+- Fit scoring calls Claude directly with your resume text + the job description; no pre-computed embedding is needed
+- Sonnet 4.6 and Opus 4.8 use extended thinking for richer gap analysis; Haiku 4.5 is faster and lighter
+- The Profile page shows a model picker when Claude is your active backend; preference is saved in your browser and sent with each scoring request
+
+**Setup:**
+1. Get an API key at [console.anthropic.com](https://console.anthropic.com) (separate from any Claude Pro subscription)
+2. Set `ANTHROPIC_API_KEY` in `api/local.settings.json` (local) or SWA Application Settings (cloud)
+3. Leave `AZURE_OPENAI_ENDPOINT` and `AZURE_OPENAI_KEY` blank (or remove them)
+4. The Profile page will show the Claude model picker once you have at least one resume saved
 
 ---
 

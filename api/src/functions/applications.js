@@ -4,13 +4,15 @@
 
 const { app } = require('@azure/functions')
 const { getStore } = require('../lib/storeFactory')
-const { embed, isConfigured } = require('../lib/embeddings')
+const { embed, isConfigured: isAzureConfigured } = require('../lib/embeddings')
 const { score } = require('../lib/scoring')
+const claudeAI = require('../lib/claudeAI')
 
 async function tryScore(store, userId, body, context) {
-  if (!isConfigured()) return {}
   const jdText = (body.jobDescriptionText ?? '').trim()
   if (!jdText) return {}
+  if (!isAzureConfigured() && !claudeAI.isConfigured()) return {}
+
   try {
     let resume = null
     if (body.resumeId) {
@@ -19,13 +21,22 @@ async function tryScore(store, userId, body, context) {
       const all = await store.listResumes(userId)
       if (all.length > 0) resume = await store.getResume(userId, all[0].id)
     }
-    if (!resume?.resumeEmbedding) return {}
-    const jdEmbedding = await embed(jdText)
-    return score(resume.resumeEmbedding, jdEmbedding, resume.resumeText, jdText)
+
+    // Azure path: needs pre-computed embedding
+    if (isAzureConfigured() && resume?.resumeEmbedding) {
+      const jdEmbedding = await embed(jdText)
+      return score(resume.resumeEmbedding, jdEmbedding, resume.resumeText, jdText)
+    }
+
+    // Claude path: reads raw text at score time, no embedding required
+    if (claudeAI.isConfigured() && resume?.resumeText) {
+      return await claudeAI.score(resume.resumeText, jdText, body.claudeModel)
+    }
   } catch (err) {
     context.error('[applications] scoring failed:', err.message)
-    return {}
   }
+
+  return {}
 }
 
 function getUserId(request) {

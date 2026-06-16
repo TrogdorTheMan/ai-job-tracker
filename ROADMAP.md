@@ -95,6 +95,7 @@ Turns the tracker from a passive log into something that tells you what to do ne
 - "Deploy to Azure" button + one-page deploy guide; verified clean local-only path
 - Docs: getting keys (Azure OpenAI, Adzuna, USAJobs), cost expectations, troubleshooting
 - Accessibility/responsive pass; error states; empty states
+- **Trogdor's Own — Claude AI backend:** alternative fit-scoring path using Anthropic's API (Haiku / Sonnet / Opus) activated by setting `ANTHROPIC_API_KEY` when Azure OpenAI keys are absent; user-selectable model on Profile page; Sonnet 4.6 default with extended thinking; no embeddings required; Azure path completely unchanged
 - **Done when:** tagged `v1.0.0`, README walks a newcomer from clone → running in <15 min.
 
 ### M7+ — Stretch

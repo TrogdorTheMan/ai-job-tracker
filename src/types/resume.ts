@@ -9,6 +9,7 @@ export interface Resume {
   resumeText: string
   hasEmbedding: boolean
   aiConfigured: boolean
+  aiProvider: 'azure' | 'claude' | null
   createdAt: string
   updatedAt: string
   warning?: string
