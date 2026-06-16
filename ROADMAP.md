@@ -90,7 +90,6 @@ Turns the tracker from a passive log into something that tells you what to do ne
 - "Deploy to Azure" button + one-page deploy guide; verified clean local-only path
 - Docs: getting keys (Azure OpenAI, Adzuna, USAJobs), cost expectations, troubleshooting
 - Accessibility/responsive pass; error states; empty states
-- 🎰 **Easter egg — Blackjack pop-out:** a tiny, self-contained, client-side blackjack game (no AI, no network, zero cost) behind a hidden trigger. Pure homage to Bender. Ships in the static bundle; never touches a key.
 - **Done when:** tagged `v1.0.0`, README walks a newcomer from clone → running in <15 min.
 
 ### M7+ — Stretch

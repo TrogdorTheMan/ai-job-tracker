@@ -2,15 +2,20 @@
 // Copyright (C) 2026 Cory "TrogdorTheMan" Francis
 // Licensed under the GNU AGPLv3. See LICENSE for details.
 
+import { useState } from 'react'
 import { Link, NavLink, Outlet } from 'react-router-dom'
 import { LayoutGrid, List, LogOut, Moon, Plus, Search, Sun, User, FileText } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
 import type { ClientPrincipal } from '@/hooks/useAuth'
 import { useTheme } from '@/hooks/useTheme'
+import { useKonamiCode } from '@/hooks/useKonamiCode'
+import BlackjackGame from '@/components/blackjack/BlackjackGame'
 
 export default function AppShell({ user }: { user: ClientPrincipal }) {
   const { theme, toggle } = useTheme()
+  const [showBlackjack, setShowBlackjack] = useState(false)
+  useKonamiCode(() => setShowBlackjack(true))
   return (
     <div className="min-h-screen bg-background">
       <header className="border-b border-border sticky top-0 z-10 bg-background/95 backdrop-blur">
@@ -103,6 +108,7 @@ export default function AppShell({ user }: { user: ClientPrincipal }) {
       <main className="px-6 py-6">
         <Outlet />
       </main>
+      {showBlackjack && <BlackjackGame onClose={() => setShowBlackjack(false)} />}
     </div>
   )
 }
