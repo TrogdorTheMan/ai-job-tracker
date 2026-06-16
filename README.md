@@ -9,7 +9,7 @@
 
 ## Status
 
-**M0 done. M1 in progress.** The tracker is usable right now — you can add jobs, move them through a pipeline on a drag-and-drop kanban board, and manage them in a list view. Auth (EasyAuth) and Azure Table Storage are coming next to close out M1, then job search (M2) and AI features (M3+). See [`ROADMAP.md`](ROADMAP.md) for the full plan and current progress.
+**M2 complete. M3 in progress.** The core tracker (M1) and job search (M2) are done and verified in production on Azure SWA. You can add jobs, drag them through a kanban pipeline, filter and sort, search live listings via Adzuna and USAJobs, import jobs by pasting a URL, and save search results directly into the tracker with duplicate detection. Auth (EasyAuth) and Azure Table Storage are both wired up and working. Next up: AI fit scoring — resume/JD matching, gap analysis, and optional LinkedIn data-export enrichment (M3). See [`ROADMAP.md`](ROADMAP.md) for the full plan and current progress.
 
 ## What it does
 
