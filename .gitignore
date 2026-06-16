@@ -15,6 +15,9 @@ api/local.settings.json
 *.local
 .vscode/settings.json
 
+# Claude Code
+.claude/
+
 # Test / coverage
 coverage/
 
