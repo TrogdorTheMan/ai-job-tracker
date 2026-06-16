@@ -17,7 +17,7 @@ import {
 } from '@/components/ui/select'
 import { Separator } from '@/components/ui/separator'
 import { STATUS_ORDER, STATUS_LABELS } from '@/types/job'
-import type { ApplicationStatus, JobApplication } from '@/types/job'
+import type { ApplicationStatus, JobApplication, StatusEvent } from '@/types/job'
 
 interface FormState {
   company: string
@@ -86,6 +86,7 @@ export default function ApplicationFormPage() {
   const isEdit = Boolean(id)
 
   const [form, setForm] = useState<FormState>(defaults)
+  const [statusHistory, setStatusHistory] = useState<StatusEvent[]>([])
   const [saving, setSaving] = useState(false)
   const [loadError, setLoadError] = useState<string | null>(null)
   const [saveError, setSaveError] = useState<string | null>(null)
@@ -93,6 +94,7 @@ export default function ApplicationFormPage() {
   useEffect(() => {
     if (!id) {
       setForm(defaults)
+      setStatusHistory([])
       return
     }
     fetch(`/api/applications/${id}`)
@@ -100,7 +102,10 @@ export default function ApplicationFormPage() {
         if (!r.ok) throw new Error('Not found')
         return r.json()
       })
-      .then((app: JobApplication) => setForm(appToFormState(app)))
+      .then((app: JobApplication) => {
+        setForm(appToFormState(app))
+        setStatusHistory(app.statusHistory ?? [])
+      })
       .catch(() => setLoadError('Could not load application.'))
   }, [id])
 
@@ -284,6 +289,31 @@ export default function ApplicationFormPage() {
           </Button>
         </div>
       </form>
+
+      {isEdit && statusHistory.length > 0 && (
+        <div className="mt-8">
+          <Separator className="mb-6" />
+          <h2 className="text-sm font-semibold mb-4">Status history</h2>
+          <ol className="relative border-l border-border space-y-4 ml-2">
+            {[...statusHistory]
+              .sort((a, b) => a.occurredAt.localeCompare(b.occurredAt))
+              .map((event) => (
+                <li key={event.id} className="pl-5 relative">
+                  <span className="absolute -left-1.5 top-1 size-3 rounded-full border-2 border-background bg-muted-foreground/40" />
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <span className="text-xs font-medium">{STATUS_LABELS[event.status]}</span>
+                    <span className="text-xs text-muted-foreground">
+                      {new Date(event.occurredAt).toLocaleString()}
+                    </span>
+                  </div>
+                  {event.note && (
+                    <p className="text-xs text-muted-foreground mt-0.5">{event.note}</p>
+                  )}
+                </li>
+              ))}
+          </ol>
+        </div>
+      )}
     </div>
   )
 }
