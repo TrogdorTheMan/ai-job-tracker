@@ -91,7 +91,10 @@ export default function ApplicationFormPage() {
   const [saveError, setSaveError] = useState<string | null>(null)
 
   useEffect(() => {
-    if (!id) return
+    if (!id) {
+      setForm(defaults)
+      return
+    }
     fetch(`/api/applications/${id}`)
       .then((r) => {
         if (!r.ok) throw new Error('Not found')

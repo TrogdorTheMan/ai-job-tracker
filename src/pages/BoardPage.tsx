@@ -24,14 +24,14 @@ import type { ApplicationStatus, JobApplication } from '@/types/job'
 import { cn } from '@/lib/utils'
 
 const STATUS_COLORS: Record<ApplicationStatus, string> = {
-  saved: 'bg-slate-100 border-slate-200',
-  applied: 'bg-blue-50 border-blue-100',
-  'phone-screen': 'bg-violet-50 border-violet-100',
-  interview: 'bg-amber-50 border-amber-100',
-  offer: 'bg-green-50 border-green-100',
-  rejected: 'bg-red-50 border-red-100',
-  ghosted: 'bg-zinc-50 border-zinc-200',
-  withdrawn: 'bg-zinc-50 border-zinc-200',
+  saved: 'bg-slate-100 border-slate-200 dark:bg-slate-800/40 dark:border-slate-700',
+  applied: 'bg-blue-50 border-blue-100 dark:bg-blue-950/50 dark:border-blue-900',
+  'phone-screen': 'bg-violet-50 border-violet-100 dark:bg-violet-950/50 dark:border-violet-900',
+  interview: 'bg-amber-50 border-amber-100 dark:bg-amber-950/50 dark:border-amber-900',
+  offer: 'bg-green-50 border-green-100 dark:bg-green-950/50 dark:border-green-900',
+  rejected: 'bg-red-50 border-red-100 dark:bg-red-950/50 dark:border-red-900',
+  ghosted: 'bg-zinc-50 border-zinc-200 dark:bg-zinc-800/40 dark:border-zinc-700',
+  withdrawn: 'bg-zinc-50 border-zinc-200 dark:bg-zinc-800/40 dark:border-zinc-700',
 }
 
 function CardInner({
@@ -53,7 +53,7 @@ function CardInner({
   return (
     <Card
       onClick={() => navigate(`/applications/${app.id}/edit`)}
-      className="cursor-pointer hover:shadow-sm transition-shadow group bg-white"
+      className="cursor-pointer hover:shadow-sm transition-shadow group bg-white dark:bg-card"
     >
       <CardHeader className="p-3 pb-1">
         <div className="flex items-start gap-1.5">
@@ -145,7 +145,7 @@ function DroppableColumn({
   const { setNodeRef, isOver } = useDroppable({ id: status })
 
   return (
-    <div className="w-64 shrink-0">
+    <div className="flex-1 min-w-36">
       <div className="flex items-center justify-between mb-2 px-1">
         <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
           {STATUS_LABELS[status]}
@@ -229,7 +229,7 @@ export default function BoardPage() {
   return (
     <DndContext sensors={sensors} onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
       <div className="overflow-x-auto pb-4">
-        <div className="flex gap-4 min-w-max">
+        <div className="flex gap-3">
           {STATUS_ORDER.map((status) => (
             <DroppableColumn
               key={status}
@@ -242,7 +242,7 @@ export default function BoardPage() {
       </div>
       <DragOverlay>
         {activeApp && (
-          <div className="w-64 rotate-1 shadow-xl">
+          <div className="w-56 rotate-1 shadow-xl">
             <CardInner app={activeApp} onDelete={() => undefined} />
           </div>
         )}

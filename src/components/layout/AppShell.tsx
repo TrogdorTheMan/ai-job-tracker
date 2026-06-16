@@ -3,12 +3,14 @@
 // Licensed under the GNU AGPLv3. See LICENSE for details.
 
 import { Link, NavLink, Outlet } from 'react-router-dom'
-import { LayoutGrid, List, LogOut, Plus, User } from 'lucide-react'
+import { LayoutGrid, List, LogOut, Moon, Plus, Sun, User } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
 import type { ClientPrincipal } from '@/hooks/useAuth'
+import { useTheme } from '@/hooks/useTheme'
 
 export default function AppShell({ user }: { user: ClientPrincipal }) {
+  const { theme, toggle } = useTheme()
   return (
     <div className="min-h-screen bg-background">
       <header className="border-b border-border sticky top-0 z-10 bg-background/95 backdrop-blur">
@@ -54,6 +56,9 @@ export default function AppShell({ user }: { user: ClientPrincipal }) {
                 <Plus className="size-4" />
                 Add job
               </Link>
+            </Button>
+            <Button variant="ghost" size="icon" onClick={toggle} title="Toggle theme">
+              {theme === 'dark' ? <Sun className="size-4" /> : <Moon className="size-4" />}
             </Button>
             <div className="flex items-center gap-1.5 text-sm text-muted-foreground pl-2 border-l border-border">
               <User className="size-3.5" />
