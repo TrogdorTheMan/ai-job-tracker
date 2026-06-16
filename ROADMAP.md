@@ -1,6 +1,6 @@
 # AI-Assisted Job Tracker & Search — Roadmap
 
-**License:** **AGPLv3** (strong copyleft + closes the SaaS/hosting loophole so it can never be made closed source, even as a hosted service) · **Hosting target:** Azure Static Web Apps (like newsite.seafairpirates.org) · **Also runs:** fully local
+**License:** **AGPLv3** (strong copyleft + closes the SaaS/hosting loophole so it can never be made closed source, even as a hosted service) · **Hosting target:** Azure Static Web Apps · **Also runs:** fully local
 **Data model:** ✅ **Bring-your-own-keys, local-first** (locked) — one codebase runs locally or on the deployer's own SWA; no shared/hosted instance.
 **Guiding principle:** *Keys are config, not code.* Ship source freely; every deployer brings their own keys.
 
@@ -12,7 +12,7 @@
 
 | Layer | Choice | Why |
 |---|---|---|
-| Frontend | Static SPA (Vite + React or Svelte) on **Azure SWA** | Matches your existing SWA workflow; free tier |
+| Frontend | Static SPA (Vite + **React**) on **Azure SWA** | Matches your existing SWA workflow; free tier |
 | API / backend | **Azure Functions** (SWA-managed) | Keeps all secrets + AI calls server-side, never in the browser |
 | Auth | **SWA built-in auth (EasyAuth)** — GitHub / Microsoft / Google | Zero custom auth code, zero cost |
 | AI | **Azure OpenAI** — `gpt-4o-mini` (generation) + `text-embedding-3-small` (scoring) | Cheapest capable models; BYO endpoint + key |
@@ -89,6 +89,6 @@ More connectors (Lever/Greenhouse boards, Jooble), application Q&A autofill, ana
 Each milestone ships something usable on its own: M1 is a working tracker, M2 adds search, M3–M5 layer AI on top. That keeps the repo demo-able at every stage and lets contributors land work without waiting on the AI layer. AI is deliberately additive so the non-AI core stays runnable by anyone, even without an Azure OpenAI key. The application-tracking *data* lands early (M1) so it's useful immediately; the AI *intelligence* over that data (next-actions, follow-ups, pipeline summary) comes in M5, once fit scores and generation exist to draw on.
 
 ## 4. Open decisions to revisit later
-- Frontend framework (React vs Svelte) — pick at M0.
+- Frontend framework: **React** (decided at M0).
 - Cloud store: Azure Table (cheapest) vs Cosmos serverless (richer queries) — decide at M1 based on query needs.
 - Whether resume files are stored at rest or kept ephemeral/client-side — privacy call at M3.
