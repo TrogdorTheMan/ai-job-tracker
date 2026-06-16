@@ -2,9 +2,19 @@
 // Copyright (C) 2026 Cory "TrogdorTheMan" Francis
 // Licensed under the GNU AGPLv3. See LICENSE for details.
 
-import { useMemo } from 'react'
+import { useState, useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Trash2, ExternalLink } from 'lucide-react'
+import {
+  DndContext,
+  DragOverlay,
+  PointerSensor,
+  useSensor,
+  useSensors,
+  useDroppable,
+  useDraggable,
+} from '@dnd-kit/core'
+import type { DragEndEvent, DragStartEvent } from '@dnd-kit/core'
+import { Trash2, ExternalLink, GripVertical } from 'lucide-react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -24,30 +34,37 @@ const STATUS_COLORS: Record<ApplicationStatus, string> = {
   withdrawn: 'bg-zinc-50 border-zinc-200',
 }
 
-function ApplicationCard({
+function CardInner({
   app,
   onDelete,
+  dragHandleProps,
 }: {
   app: JobApplication
   onDelete: (id: string) => void
+  dragHandleProps?: React.HTMLAttributes<HTMLButtonElement>
 }) {
   const navigate = useNavigate()
 
   function handleDelete(e: React.MouseEvent) {
     e.stopPropagation()
-    if (confirm(`Delete "${app.company} — ${app.role}"?`)) {
-      onDelete(app.id)
-    }
+    if (confirm(`Delete "${app.company} — ${app.role}"?`)) onDelete(app.id)
   }
 
   return (
     <Card
       onClick={() => navigate(`/applications/${app.id}/edit`)}
-      className="cursor-pointer hover:shadow-sm transition-shadow group"
+      className="cursor-pointer hover:shadow-sm transition-shadow group bg-white"
     >
       <CardHeader className="p-3 pb-1">
-        <div className="flex items-start justify-between gap-2">
-          <div className="min-w-0">
+        <div className="flex items-start gap-1.5">
+          <button
+            className="mt-0.5 shrink-0 cursor-grab active:cursor-grabbing text-muted-foreground/40 hover:text-muted-foreground transition-colors"
+            onClick={(e) => e.stopPropagation()}
+            {...dragHandleProps}
+          >
+            <GripVertical className="size-3.5" />
+          </button>
+          <div className="min-w-0 flex-1">
             <CardTitle className="text-sm font-semibold truncate">{app.company}</CardTitle>
             <p className="text-xs text-muted-foreground truncate mt-0.5">{app.role}</p>
           </div>
@@ -73,7 +90,10 @@ function ApplicationCard({
       {(app.location ?? app.appliedDate) && (
         <CardContent className="p-3 pt-1">
           {app.location && (
-            <p className="text-xs text-muted-foreground">{app.location}{app.remote ? ' · Remote' : ''}</p>
+            <p className="text-xs text-muted-foreground">
+              {app.location}
+              {app.remote ? ' · Remote' : ''}
+            </p>
           )}
           {app.appliedDate && (
             <p className="text-xs text-muted-foreground">
@@ -86,8 +106,83 @@ function ApplicationCard({
   )
 }
 
+function DraggableCard({
+  app,
+  onDelete,
+}: {
+  app: JobApplication
+  onDelete: (id: string) => void
+}) {
+  const { attributes, listeners, setNodeRef, transform, isDragging } = useDraggable({
+    id: app.id,
+    data: { app },
+  })
+
+  return (
+    <div
+      ref={setNodeRef}
+      style={
+        transform
+          ? { transform: `translate3d(${transform.x}px, ${transform.y}px, 0)` }
+          : undefined
+      }
+      className={isDragging ? 'opacity-30' : ''}
+    >
+      <CardInner app={app} onDelete={onDelete} dragHandleProps={{ ...attributes, ...listeners }} />
+    </div>
+  )
+}
+
+function DroppableColumn({
+  status,
+  apps,
+  onDelete,
+}: {
+  status: ApplicationStatus
+  apps: JobApplication[]
+  onDelete: (id: string) => void
+}) {
+  const { setNodeRef, isOver } = useDroppable({ id: status })
+
+  return (
+    <div className="w-64 shrink-0">
+      <div className="flex items-center justify-between mb-2 px-1">
+        <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+          {STATUS_LABELS[status]}
+        </span>
+        {apps.length > 0 && (
+          <Badge variant="secondary" className="text-xs h-5 px-1.5">
+            {apps.length}
+          </Badge>
+        )}
+      </div>
+      <div
+        ref={setNodeRef}
+        className={cn(
+          'rounded-lg border p-2 min-h-24 flex flex-col gap-2 transition-all',
+          STATUS_COLORS[status],
+          isOver && 'ring-2 ring-primary ring-offset-1'
+        )}
+      >
+        {apps.length === 0 ? (
+          <p className="text-xs text-muted-foreground text-center py-4">—</p>
+        ) : (
+          apps.map((app) => (
+            <DraggableCard key={app.id} app={app} onDelete={onDelete} />
+          ))
+        )}
+      </div>
+    </div>
+  )
+}
+
 export default function BoardPage() {
   const { applications, loading, error, refresh } = useApplications()
+  const [activeApp, setActiveApp] = useState<JobApplication | null>(null)
+
+  const sensors = useSensors(
+    useSensor(PointerSensor, { activationConstraint: { distance: 8 } })
+  )
 
   const byStatus = useMemo(
     () =>
@@ -101,6 +196,28 @@ export default function BoardPage() {
     [applications]
   )
 
+  function handleDragStart(event: DragStartEvent) {
+    setActiveApp((event.active.data.current as { app: JobApplication } | undefined)?.app ?? null)
+  }
+
+  async function handleDragEnd(event: DragEndEvent) {
+    const { active, over } = event
+    setActiveApp(null)
+    if (!over) return
+
+    const appId = active.id as string
+    const newStatus = over.id as ApplicationStatus
+    const app = applications.find((a) => a.id === appId)
+    if (!app || app.status === newStatus) return
+
+    await fetch(`/api/applications/${appId}/status`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ status: newStatus, occurredAt: new Date().toISOString() }),
+    })
+    refresh()
+  }
+
   async function handleDelete(id: string) {
     await fetch(`/api/applications/${id}`, { method: 'DELETE' })
     refresh()
@@ -110,35 +227,26 @@ export default function BoardPage() {
   if (error) return <p className="text-destructive text-sm">Error: {error}</p>
 
   return (
-    <div className="overflow-x-auto pb-4">
-      <div className="flex gap-4 min-w-max">
-        {STATUS_ORDER.map((status) => {
-          const cards = byStatus[status]
-          return (
-            <div key={status} className="w-64 shrink-0">
-              <div className="flex items-center justify-between mb-2 px-1">
-                <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-                  {STATUS_LABELS[status]}
-                </span>
-                {cards.length > 0 && (
-                  <Badge variant="secondary" className="text-xs h-5 px-1.5">
-                    {cards.length}
-                  </Badge>
-                )}
-              </div>
-              <div className={cn('rounded-lg border p-2 min-h-24 flex flex-col gap-2', STATUS_COLORS[status])}>
-                {cards.length === 0 ? (
-                  <p className="text-xs text-muted-foreground text-center py-4">—</p>
-                ) : (
-                  cards.map((app) => (
-                    <ApplicationCard key={app.id} app={app} onDelete={handleDelete} />
-                  ))
-                )}
-              </div>
-            </div>
-          )
-        })}
+    <DndContext sensors={sensors} onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
+      <div className="overflow-x-auto pb-4">
+        <div className="flex gap-4 min-w-max">
+          {STATUS_ORDER.map((status) => (
+            <DroppableColumn
+              key={status}
+              status={status}
+              apps={byStatus[status]}
+              onDelete={handleDelete}
+            />
+          ))}
+        </div>
       </div>
-    </div>
+      <DragOverlay>
+        {activeApp && (
+          <div className="w-64 rotate-1 shadow-xl">
+            <CardInner app={activeApp} onDelete={() => undefined} />
+          </div>
+        )}
+      </DragOverlay>
+    </DndContext>
   )
 }
