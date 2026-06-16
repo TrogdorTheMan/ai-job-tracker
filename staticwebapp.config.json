@@ -10,6 +10,26 @@
       "allowedRoles": ["authenticated"]
     }
   ],
+  "auth": {
+    "identityProviders": {
+      "customOpenIdConnectProviders": {
+        "linkedin": {
+          "registration": {
+            "clientIdSettingName": "LINKEDIN_CLIENT_ID",
+            "clientCredential": {
+              "clientSecretSettingName": "LINKEDIN_CLIENT_SECRET"
+            },
+            "openIdConnectConfiguration": {
+              "wellKnownOpenIdConfiguration": "https://www.linkedin.com/oauth/.well-known/openid-configuration"
+            }
+          },
+          "login": {
+            "scopes": ["openid", "profile", "email"]
+          }
+        }
+      }
+    }
+  },
   "responseOverrides": {
     "401": {
       "statusCode": 401

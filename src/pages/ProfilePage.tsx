@@ -2,7 +2,7 @@
 // Copyright (C) 2026 Cory "TrogdorTheMan" Francis
 // Licensed under the GNU AGPLv3. See LICENSE for details.
 
-import { useState, useRef } from 'react'
+import { useState, useRef, type ChangeEvent } from 'react'
 import { useResumes } from '@/hooks/useResumes'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -151,13 +151,39 @@ export default function ProfilePage() {
   const { resumes, loading, error, createResume, updateResume, deleteResume } = useResumes()
   const [editingId, setEditingId] = useState<string | null>(null)
   const [showAdd, setShowAdd] = useState(false)
+  const [addInitial, setAddInitial] = useState<{ name: string; resumeText: string } | undefined>()
   const [saving, setSaving] = useState(false)
+  const [linkedinImporting, setLinkedinImporting] = useState(false)
+  const [linkedinError, setLinkedinError] = useState<string | null>(null)
+  const linkedinInputRef = useRef<HTMLInputElement>(null)
+
+  async function handleLinkedinImport(e: ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0]
+    if (!file) return
+    setLinkedinError(null)
+    setLinkedinImporting(true)
+    try {
+      const formData = new FormData()
+      formData.append('file', file)
+      const res = await fetch('/api/import-linkedin', { method: 'POST', body: formData })
+      const data = await res.json()
+      if (!res.ok) throw new Error(data.error ?? 'Import failed')
+      setAddInitial({ name: data.suggestedName, resumeText: data.profileText })
+      setShowAdd(true)
+      setEditingId(null)
+    } catch (err: unknown) {
+      setLinkedinError(err instanceof Error ? err.message : 'Could not import LinkedIn export.')
+    } finally {
+      setLinkedinImporting(false)
+      if (linkedinInputRef.current) linkedinInputRef.current.value = ''
+    }
+  }
 
   async function handleCreate(name: string, resumeText: string) {
     setSaving(true)
     const created = await createResume(name, resumeText)
     setSaving(false)
-    if (created) setShowAdd(false)
+    if (created) { setShowAdd(false); setAddInitial(undefined) }
   }
 
   async function handleUpdate(id: string, name: string, resumeText: string) {
@@ -195,14 +221,43 @@ export default function ProfilePage() {
 
       <Separator />
 
+      <div className="rounded-md border border-border p-4 space-y-2 bg-muted/20">
+        <p className="text-sm font-medium">Import from LinkedIn</p>
+        <p className="text-xs text-muted-foreground">
+          Download your data from LinkedIn (Settings → Data Privacy → Get a copy of your data) and upload the <code>.zip</code> — no API key required.
+        </p>
+        <div className="flex items-center gap-2 pt-1">
+          <input
+            ref={linkedinInputRef}
+            type="file"
+            accept=".zip"
+            className="hidden"
+            onChange={handleLinkedinImport}
+          />
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            disabled={linkedinImporting}
+            onClick={() => linkedinInputRef.current?.click()}
+          >
+            {linkedinImporting ? 'Importing…' : 'Import LinkedIn export (.zip)'}
+          </Button>
+        </div>
+        {linkedinError && <p className="text-sm text-destructive">{linkedinError}</p>}
+      </div>
+
+      <Separator />
+
       {error && <p className="text-sm text-destructive">{error}</p>}
 
       <div className="space-y-4">
         {showAdd && (
           <ResumeForm
+            initial={addInitial}
             saving={saving}
             onSave={handleCreate}
-            onCancel={() => setShowAdd(false)}
+            onCancel={() => { setShowAdd(false); setAddInitial(undefined) }}
           />
         )}
 

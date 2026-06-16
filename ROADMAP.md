@@ -61,7 +61,7 @@ Search real listings inside the app.
 - ✅ **Kanban board improvements:** fluid equal-width columns that fill the viewport at any window size with no horizontal scroll; company and role titles line-clamped; location/date truncated
 - **Done when:** a user with their own Adzuna/USAJobs key can search and save jobs; a user with no keys can still paste a URL and save it; app still works for users who configure neither. ✅ Verified in production on Azure SWA.
 
-### M3 — AI fit scoring 🚧 *(in progress)*
+### M3 — AI fit scoring ✅ *(complete)*
 Resume ↔ job-description matching, with an optional LinkedIn-enriched profile.
 - ✅ Resume upload/paste → stored at rest in Azure Table (per-user, BYO storage) + embedded once via `text-embedding-3-small` (cached); no re-embed on reload
 - ✅ `GET/PUT /api/profile` — stores `resumeText` + `resumeEmbedding` (vector cached, never sent to client); graceful no-op if Azure OpenAI keys absent
@@ -72,11 +72,10 @@ Resume ↔ job-description matching, with an optional LinkedIn-enriched profile.
 - ✅ New env vars documented: `AZURE_OPENAI_ENDPOINT`, `AZURE_OPENAI_KEY`, `AZURE_OPENAI_EMBEDDING_DEPLOYMENT`
 - ✅ **Resume file upload:** accept `.pdf` and `.docx` uploads; parse text server-side and feed into the same embed + store flow
 - ✅ **Named resume library:** multiple resumes per user, each with a name, file upload, and independent embedding; per-application resume selection for fit scoring; scoring falls back to first resume if none selected
-- ⬜ **LinkedIn profile enrichment — optional, no API key required:**
-  - **Data export import:** user downloads their own `.zip` from LinkedIn (Settings → Data Privacy → Get a copy of your data) and drops it in the app. We parse the CSVs (positions, skills, education) client-side or server-side. No key, no scraping, fully ToS-compliant, and richer than what the API returns. **This is the primary enrichment path.**
-  - **"Sign in with LinkedIn" (OpenID):** standard OAuth login using LinkedIn's free basic profile scope — no LinkedIn app approval or key needed beyond registering a free OAuth app. Pulls name, headline, and photo for identity. Feature-flagged.
-  - The AI references the parsed profile alongside the resume for richer fit scoring, tailoring (M4), and assistant context (M5). **No scraping, ever.**
-- **Done when:** LinkedIn enrichment shipped + saved jobs show a fit score and a "what's missing" summary, with embeddings cached (no re-embedding on reload).
+- ✅ **LinkedIn profile enrichment — optional, no API key required:**
+  - **Data export import:** user downloads their own `.zip` from LinkedIn (Settings → Data Privacy → Get a copy of your data) and drops it in the app. Parses Positions, Skills, Education, and Profile CSVs server-side; creates a named resume entry pre-filled with formatted work history. No key, no scraping, fully ToS-compliant.
+  - **"Sign in with LinkedIn" (OpenID):** standard OAuth login using LinkedIn's free basic profile scope — requires a free LinkedIn OAuth app registration. Configured as a custom OIDC provider in Azure SWA EasyAuth; cloud-only (SWA emulator does not support custom OIDC). Feature-flagged via `LINKEDIN_CLIENT_ID` / `LINKEDIN_CLIENT_SECRET` SWA app settings.
+- **Done when:** LinkedIn enrichment shipped + saved jobs show a fit score and a "what's missing" summary, with embeddings cached (no re-embedding on reload). ✅ Complete.
 
 ### M4 — AI generation *(the differentiators)*
 - **Resume tailoring:** per-posting bullet/keyword edit suggestions (diff view, user approves)

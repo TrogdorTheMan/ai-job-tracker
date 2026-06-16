@@ -21,6 +21,11 @@ const PROVIDERS = [
     label: 'Sign in with Google',
     Icon: null,
   },
+  {
+    id: 'linkedin',
+    label: 'Sign in with LinkedIn',
+    Icon: null,
+  },
 ]
 
 export default function LoginPage() {
