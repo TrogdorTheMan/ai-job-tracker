@@ -46,13 +46,16 @@ A solid manual job tracker.
 - ✅ Filter + sort on board/list; timeline of status changes per application
 - **Done when:** you can track a real job hunt — what you applied to, when, where it stands, and what's next — without touching any AI or external API.
 
-### M2 — Job aggregation 🚧 *(in progress)*
+### M2 — Job aggregation ✅ *(complete)*
 Search real listings inside the app.
-- Connector interface + first connectors: Adzuna, USAJobs (both free keys)
-- Search UI (keywords, location, remote); one-click "save to tracker"
-- **Direct URL import:** paste any job posting URL → app fetches the page (user-initiated, single request — not scraping) and pre-fills company, role, and JD text; user reviews and saves. Fallback for any posting not covered by a connector.
-- Dedup + rate-limit handling; graceful degradation if a connector key is missing
-- **Done when:** a user with their own Adzuna/USAJobs key can search and save jobs; a user with no keys can still paste a URL and save it; app still works for users who configure neither.
+- ✅ Connector interface with Adzuna and USAJobs adapters (both free keys); graceful degradation when keys are absent — each connector is independently optional
+- ✅ `GET /api/search` fan-out endpoint: queries all available connectors in parallel via `Promise.allSettled`, deduplicates results by URL, sorts by post date, caps at 50 results; returns per-source status metadata
+- ✅ Search UI (`/search`): keywords, location, remote-only filter; source status strip shows result counts or unavailability reason per connector (notes USAJobs = federal jobs only)
+- ✅ **"Save to Tracker"** on a search result opens the New Application form pre-filled (company, role, URL, location, remote) via React Router state — user reviews and saves
+- ✅ **Duplicate detection:** "Already in tracker" badge on search results whose URL matches an existing application
+- ✅ **Direct URL import:** paste any job posting URL at the top of the New Application form → server fetches the page, parses schema.org `JobPosting` LD+JSON first (works on Greenhouse, Lever, Workday, Indeed, etc.), falls back to heuristic HTML extraction; SSRF-protected; handles 403s with a user-friendly message
+- ✅ **Kanban board improvements:** fluid equal-width columns that fill the viewport at any window size with no horizontal scroll; company and role titles line-clamped; location/date truncated
+- **Done when:** a user with their own Adzuna/USAJobs key can search and save jobs; a user with no keys can still paste a URL and save it; app still works for users who configure neither. ✅ Verified in production on Azure SWA.
 
 ### M3 — AI fit scoring *(first Azure AI feature)*
 Resume ↔ job-description matching, with an optional LinkedIn-enriched profile.
