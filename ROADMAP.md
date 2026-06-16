@@ -70,7 +70,8 @@ Resume ↔ job-description matching, with an optional LinkedIn-enriched profile.
 - ✅ `/profile` page — resume paste area, embedded status badge, last-saved timestamp; nav link in header
 - ✅ Graceful degradation — no AI keys → no scores, everything else works normally
 - ✅ New env vars documented: `AZURE_OPENAI_ENDPOINT`, `AZURE_OPENAI_KEY`, `AZURE_OPENAI_EMBEDDING_DEPLOYMENT`
-- ⬜ **Resume file upload:** accept `.pdf` and `.docx` uploads on the Profile page as an alternative to paste; parse text server-side and feed into the same embed + store flow
+- ✅ **Resume file upload:** accept `.pdf` and `.docx` uploads; parse text server-side and feed into the same embed + store flow
+- ✅ **Named resume library:** multiple resumes per user, each with a name, file upload, and independent embedding; per-application resume selection for fit scoring; scoring falls back to first resume if none selected
 - ⬜ **LinkedIn profile enrichment — optional, no API key required:**
   - **Data export import:** user downloads their own `.zip` from LinkedIn (Settings → Data Privacy → Get a copy of your data) and drops it in the app. We parse the CSVs (positions, skills, education) client-side or server-side. No key, no scraping, fully ToS-compliant, and richer than what the API returns. **This is the primary enrichment path.**
   - **"Sign in with LinkedIn" (OpenID):** standard OAuth login using LinkedIn's free basic profile scope — no LinkedIn app approval or key needed beyond registering a free OAuth app. Pulls name, headline, and photo for identity. Feature-flagged.
@@ -98,7 +99,7 @@ Turns the tracker from a passive log into something that tells you what to do ne
 - **Done when:** tagged `v1.0.0`, README walks a newcomer from clone → running in <15 min.
 
 ### M7+ — Stretch
-More connectors (Lever/Greenhouse boards, Jooble), application Q&A autofill, analytics dashboard, scheduled "new matches" digest email, browser extension to capture postings. **Custom job board sources:** let a user register an RSS feed or structured listing URL (e.g. a company careers page that publishes a feed) as a named source so it shows up alongside the built-in connectors in search.
+More connectors (Lever/Greenhouse boards, Jooble), application Q&A autofill, analytics dashboard, scheduled "new matches" digest email, browser extension to capture postings. **Custom job board sources:** let a user register an RSS feed or structured listing URL (e.g. a company careers page that publishes a feed) as a named source so it shows up alongside the built-in connectors in search. **Embedding model upgrade:** swap `text-embedding-3-small` for `text-embedding-3-large` via a single deployment name config change — improves semantic scoring quality at ~6× the token cost (still negligible at personal/small-team scale; ~$0.04 vs $0.006 per 1M tokens).
 
 ---
 
