@@ -36,13 +36,14 @@ Repo + license + the "two ways to run" skeleton.
 - CI (GitHub Actions): lint + build + SWA preview deploy
 - **Done when:** a stranger can clone, copy `.env.example` → `.env`, add nothing, and get a blank app running locally.
 
-### M1 — Core tracker *(the product is useful even with zero AI)*
+### M1 — Core tracker *(the product is useful even with zero AI)* 🚧 *in progress*
 A solid manual job tracker.
-- Auth wired via EasyAuth; per-user data isolation
-- CRUD for applications with full pipeline state: company, role, link, status (saved → applied → interview → offer/rejected/ghosted), applied date, follow-up date, next action, contacts, notes — the structured fields the AI assistant (M5) later reasons over
-- Storage abstraction with two adapters (local file/SQLite + Azure Table) behind one interface
-- Board/list view with filter + sort; timeline of status changes per application
-- **Drag-and-drop kanban:** cards draggable between status columns to update status without opening the edit form
+- ⬜ Auth wired via EasyAuth; per-user data isolation
+- ✅ CRUD for applications with full pipeline state: company, role, link, status (saved → applied → interview → offer/rejected/ghosted), applied date, follow-up date, next action, contacts, notes — the structured fields the AI assistant (M5) later reasons over
+- ⬜ Storage abstraction with two adapters (local JSON + Azure Table) behind one interface
+- ✅ Board (kanban) and list views
+- ✅ **Drag-and-drop kanban:** cards draggable between status columns to update status without opening the edit form
+- ⬜ Filter + sort on board/list; timeline of status changes per application
 - **Done when:** you can track a real job hunt — what you applied to, when, where it stands, and what's next — without touching any AI or external API.
 
 ### M2 — Job aggregation *(official APIs)*

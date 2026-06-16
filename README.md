@@ -9,7 +9,7 @@
 
 ## Status
 
-Early days. The skeleton is going up and milestones are landing one at a time (see [`ROADMAP.md`](ROADMAP.md) for the plan). The honest version: this is a work in progress, not a finished product. Star it, watch it, or come back when there's more to see.
+**M0 done. M1 in progress.** The tracker is usable right now — you can add jobs, move them through a pipeline on a drag-and-drop kanban board, and manage them in a list view. Auth (EasyAuth) and Azure Table Storage are coming next to close out M1, then job search (M2) and AI features (M3+). See [`ROADMAP.md`](ROADMAP.md) for the full plan and current progress.
 
 ## What it does
 
