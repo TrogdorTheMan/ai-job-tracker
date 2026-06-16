@@ -28,12 +28,17 @@ Translation: nobody's API key is getting billed for your job hunt except your ow
 
 ## Quick start (local)
 
+**Prerequisites:**
+- [Node.js 20](https://nodejs.org/) (Azure Functions doesn't support Node 22+ yet — use [fnm](https://github.com/Schniz/fnm) to manage versions)
+- [Azure Functions Core Tools v4](https://learn.microsoft.com/azure/azure-functions/functions-run-local): `npm install -g azure-functions-core-tools@4`
+
 ```bash
 git clone <your-fork-url> ai-job-tracker
 cd ai-job-tracker
-cp .env.example .env       # then fill in your keys
-npm install
-npm run dev
+cp .env.example .env                              # fill in keys, or leave blank for the plain tracker
+cp api/local.settings.json.example api/local.settings.json
+npm install && cd api && npm install && cd ..     # install root + API deps separately
+npm run dev                                       # http://localhost:4280
 ```
 
 That's it — it runs fully local, no cloud account required. The AI features stay dark until you add an Azure OpenAI key, so the plain tracker works out of the box.

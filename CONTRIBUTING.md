@@ -4,19 +4,19 @@ Bug reports, ideas, and pull requests are all welcome. Be excellent to each othe
 
 ## Prerequisites
 
-- [Node.js](https://nodejs.org/) 20+
-- [Azure Functions Core Tools](https://learn.microsoft.com/azure/azure-functions/functions-run-local) v4 (`npm install -g azure-functions-core-tools@4`)
-- Azure Static Web Apps CLI (installed automatically via `npm install`)
+- **Node.js 20** — Azure Functions Core Tools v4 does not support Node 22+. Use [fnm](https://github.com/Schniz/fnm) to manage versions (`winget install Schniz.fnm` on Windows, then `fnm install 20 && fnm use 20`)
+- **Azure Functions Core Tools v4** — `npm install -g azure-functions-core-tools@4`
+- **Azure Static Web Apps CLI** — installed automatically via `npm install`
 
 ## Getting started
 
 ```bash
 git clone <repo>
 cd ai-job-tracker
-cp .env.example .env          # fill in keys — or leave blank for the plain tracker
+cp .env.example .env                              # fill in keys — or leave blank for the plain tracker
 cp api/local.settings.json.example api/local.settings.json
-npm install
-npm run dev                   # http://localhost:4280
+npm install && cd api && npm install && cd ..     # root and API have separate dependencies
+npm run dev                                       # http://localhost:4280
 ```
 
 `npm run dev` starts the Vite dev server, the Azure Functions emulator, and the SWA proxy together. All three in one command.
