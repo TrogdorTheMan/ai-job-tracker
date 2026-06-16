@@ -33,18 +33,26 @@ interface FormState {
   jobDescriptionText: string
 }
 
-const defaults: FormState = {
-  company: '',
-  role: '',
-  url: '',
-  location: '',
-  remote: false,
-  status: 'saved',
-  appliedDate: '',
-  followUpDate: '',
-  nextAction: '',
-  notes: '',
-  jobDescriptionText: '',
+function pacificDate(offsetDays = 0): string {
+  const d = new Date()
+  d.setDate(d.getDate() + offsetDays)
+  return new Intl.DateTimeFormat('en-CA', { timeZone: 'America/Los_Angeles' }).format(d)
+}
+
+function makeDefaults(): FormState {
+  return {
+    company: '',
+    role: '',
+    url: '',
+    location: '',
+    remote: false,
+    status: 'saved',
+    appliedDate: pacificDate(),
+    followUpDate: pacificDate(7),
+    nextAction: '',
+    notes: '',
+    jobDescriptionText: '',
+  }
 }
 
 function appToFormState(app: JobApplication): FormState {
@@ -85,7 +93,7 @@ export default function ApplicationFormPage() {
   const navigate = useNavigate()
   const isEdit = Boolean(id)
 
-  const [form, setForm] = useState<FormState>(defaults)
+  const [form, setForm] = useState<FormState>(makeDefaults)
   const [statusHistory, setStatusHistory] = useState<StatusEvent[]>([])
   const [saving, setSaving] = useState(false)
   const [loadError, setLoadError] = useState<string | null>(null)
@@ -93,7 +101,7 @@ export default function ApplicationFormPage() {
 
   useEffect(() => {
     if (!id) {
-      setForm(defaults)
+      setForm(makeDefaults())
       setStatusHistory([])
       return
     }
@@ -111,6 +119,13 @@ export default function ApplicationFormPage() {
 
   function set(field: keyof FormState, value: string | boolean) {
     setForm((prev) => ({ ...prev, [field]: value }))
+  }
+
+  async function handleDelete() {
+    if (!confirm('Delete this application? This cannot be undone.')) return
+    setSaving(true)
+    await fetch(`/api/applications/${id}`, { method: 'DELETE' })
+    navigate('/board')
   }
 
   async function handleSubmit(e: FormEvent) {
@@ -280,13 +295,20 @@ export default function ApplicationFormPage() {
 
         {saveError && <p className="text-sm text-destructive">{saveError}</p>}
 
-        <div className="flex gap-3">
-          <Button type="submit" disabled={saving}>
-            {saving ? 'Saving…' : isEdit ? 'Save changes' : 'Add job'}
-          </Button>
-          <Button type="button" variant="outline" onClick={() => navigate(-1)}>
-            Cancel
-          </Button>
+        <div className="flex items-center justify-between">
+          <div className="flex gap-3">
+            <Button type="submit" disabled={saving}>
+              {saving ? 'Saving…' : isEdit ? 'Save changes' : 'Add job'}
+            </Button>
+            <Button type="button" variant="outline" onClick={() => navigate(-1)} disabled={saving}>
+              Cancel
+            </Button>
+          </div>
+          {isEdit && (
+            <Button type="button" variant="destructive" onClick={handleDelete} disabled={saving}>
+              Delete
+            </Button>
+          )}
         </div>
       </form>
 
