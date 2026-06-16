@@ -31,3 +31,6 @@ api/.data/
 # Azure Functions temp files
 bin/
 obj/
+
+# Local working notes
+collaborator.md
