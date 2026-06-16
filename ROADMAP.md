@@ -43,7 +43,7 @@ A solid manual job tracker.
 - 🔶 Storage abstraction with two adapters (local JSON + Azure Table) behind one interface — *code complete; Azure Table adapter untested in production (requires Storage account + app settings in SWA portal before M1 can be called done)*
 - ✅ Board (kanban) and list views
 - ✅ **Drag-and-drop kanban:** cards draggable between status columns to update status without opening the edit form
-- ⬜ Filter + sort on board/list; timeline of status changes per application
+- ✅ Filter + sort on board/list; timeline of status changes per application
 - **Done when:** you can track a real job hunt — what you applied to, when, where it stands, and what's next — without touching any AI or external API.
 
 ### M2 — Job aggregation *(official APIs)*
