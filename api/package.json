@@ -1,0 +1,12 @@
+{
+  "name": "ai-job-tracker-api",
+  "version": "1.0.0",
+  "description": "Azure Functions backend for ai-job-tracker",
+  "main": "src/functions/health.js",
+  "scripts": {
+    "start": "func start"
+  },
+  "dependencies": {
+    "@azure/functions": "^4.5.0"
+  }
+}

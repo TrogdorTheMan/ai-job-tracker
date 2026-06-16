@@ -1,0 +1,23 @@
+# Dependencies
+node_modules/
+api/node_modules/
+
+# Build output
+dist/
+api/dist/
+
+# Environment — NEVER commit real keys
+.env
+api/local.settings.json
+
+# Editor / OS
+.DS_Store
+*.local
+.vscode/settings.json
+
+# Test / coverage
+coverage/
+
+# Azure Functions temp files
+bin/
+obj/
